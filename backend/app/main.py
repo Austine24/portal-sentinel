@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.routes.assessments import router as assessments_router
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -13,6 +14,9 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Content-Type"],
 )
+
+
+app.include_router(assessments_router)
 
 
 @app.get("/health")
