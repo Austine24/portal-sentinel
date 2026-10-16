@@ -42,7 +42,7 @@ export function Layout() {
             <span className="inline-block h-2 w-2 rounded-full bg-slate-500" />
             Portaldot connection: <span className="text-slate-400">not connected (prototype)</span>
           </div>
-          <DemoBadge label="PROTOTYPE: ALL DATA IS DEMO / SIMULATED" />
+          <DemoBadge label="DATA IS DEMO / SIMULATED UNTIL PORTALDOT IS CONNECTED" />
         </header>
         <main className="mx-auto max-w-6xl p-6">
           <Outlet />

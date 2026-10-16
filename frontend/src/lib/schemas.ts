@@ -1,0 +1,59 @@
+import { z } from "zod";
+
+// TypeScript types vanish at runtime, so data from the network is validated here
+// before the rest of the app is allowed to trust it.
+
+export const riskLevelSchema = z.enum(["low", "guarded", "moderate", "high", "critical"]);
+export const statusSchema = z.enum(["open", "investigating", "confirmed", "resolved", "false_positive"]);
+export const originSchema = z.enum(["live", "simulated"]);
+
+const factorSchema = z.object({
+  label: z.string(),
+  detail: z.string(),
+  weight: z.number(),
+});
+
+const findingSchema = z.object({
+  rule_id: z.string(),
+  name: z.string(),
+  strength: z.number(),
+  confidence: z.number(),
+  summary: z.string(),
+  evidence: z.record(z.string(), z.union([z.number(), z.string()])),
+  suggestion: z.string(),
+});
+
+const eventSchema = z.object({ at: z.string(), text: z.string() });
+
+export const incidentSchema = z.object({
+  id: z.number(),
+  public_id: z.string(),
+  title: z.string(),
+  account: z.string(),
+  risk_score: z.number(),
+  level: riskLevelSchema,
+  status: statusSchema,
+  data_origin: originSchema,
+  summary: z.string(),
+  factors: z.array(factorSchema),
+  findings: z.array(findingSchema),
+  detected_at: z.string(),
+  updated_at: z.string(),
+  events: z.array(eventSchema),
+  evidence: z.object({ anchored: z.boolean(), tx_hash: z.string().nullable() }),
+  allowed_next: z.array(statusSchema),
+});
+
+export const incidentListSchema = z.array(incidentSchema);
+
+export const syncResultSchema = z.object({
+  created: z.number(),
+  skipped: z.number(),
+  data_origin: originSchema,
+});
+
+export type RiskLevel = z.infer<typeof riskLevelSchema>;
+export type IncidentStatus = z.infer<typeof statusSchema>;
+export type DataOrigin = z.infer<typeof originSchema>;
+export type Incident = z.infer<typeof incidentSchema>;
+export type SyncResult = z.infer<typeof syncResultSchema>;
