@@ -12,10 +12,11 @@ Monitor. Detect. Investigate. Verify.
 - Rule engine (transaction burst, value anomaly) with per-account baselines and explained evidence
 - Risk engine with configurable weights and risk bands
 - Incident workflow (status transitions, audit timeline) stored in MySQL/MariaDB
+- Evidence packages: frozen, canonical JSON per incident with a SHA-256 hash, plus a standalone verifier (`scripts/verify_evidence.py`, standard library only)
 - React dashboard, incident list and detail pages talking to the API
 - Read-only chain connectivity check script
 
-Not built yet: live Portaldot data, Isolation Forest model, wallet, evidence contract, authentication.
+Not built yet: live Portaldot data, Isolation Forest model, wallet, on-chain evidence contract, authentication.
 
 ## Run the backend
 ```powershell
@@ -58,3 +59,10 @@ npm run build   # type-check and build
 ## Third-party software
 FastAPI, Uvicorn, Pydantic, pydantic-settings, SQLAlchemy, PyMySQL, cryptography, Alembic (backend);
 React, Vite, Tailwind CSS, React Router, Recharts, Framer Motion, Lucide, Zod (frontend).
+
+## Verify an evidence hash yourself
+On an incident page press "Prepare evidence package", then "Download JSON", then:
+```powershell
+python scripts\verify_evidence.py INC-00001-evidence.json 0xTHE_HASH_SHOWN_IN_THE_UI
+```
+It prints `MATCH` when the recomputed hash equals the one shown (or the one anchored on-chain later).

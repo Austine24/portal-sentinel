@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Any, Literal
 
 from pydantic import AwareDatetime, BaseModel, Field
 
@@ -22,8 +22,19 @@ class IncidentEvent(BaseModel):
 
 
 class Evidence(BaseModel):
+    prepared: bool
+    hash: str | None = None
     anchored: bool
     tx_hash: str | None = None
+
+
+class EvidencePackage(BaseModel):
+    hash: str
+    package: dict[str, Any]
+
+
+class VerifyResult(BaseModel):
+    hash: str
 
 
 class IncidentOut(BaseModel):

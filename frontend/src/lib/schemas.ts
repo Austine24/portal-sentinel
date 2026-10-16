@@ -40,8 +40,18 @@ export const incidentSchema = z.object({
   detected_at: z.string(),
   updated_at: z.string(),
   events: z.array(eventSchema),
-  evidence: z.object({ anchored: z.boolean(), tx_hash: z.string().nullable() }),
+  evidence: z.object({
+    prepared: z.boolean(),
+    hash: z.string().nullable(),
+    anchored: z.boolean(),
+    tx_hash: z.string().nullable(),
+  }),
   allowed_next: z.array(statusSchema),
+});
+
+export const evidencePackageSchema = z.object({
+  hash: z.string(),
+  package: z.record(z.string(), z.unknown()),
 });
 
 export const incidentListSchema = z.array(incidentSchema);
@@ -57,3 +67,4 @@ export type IncidentStatus = z.infer<typeof statusSchema>;
 export type DataOrigin = z.infer<typeof originSchema>;
 export type Incident = z.infer<typeof incidentSchema>;
 export type SyncResult = z.infer<typeof syncResultSchema>;
+export type EvidencePackage = z.infer<typeof evidencePackageSchema>;

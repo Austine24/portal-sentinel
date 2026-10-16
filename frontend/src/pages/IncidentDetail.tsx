@@ -8,9 +8,9 @@ import { Page } from "../components/Page";
 import { RiskGauge } from "../components/RiskGauge";
 import { SeverityBadge } from "../components/SeverityBadge";
 import { useAsync } from "../hooks/useAsync";
-import { changeStatus, getIncident } from "../lib/api";
+import { changeStatus, getEvidence, getIncident, prepareEvidence } from "../lib/api";
 import { STATUS_LABEL } from "../lib/risk";
-import type { Incident, IncidentStatus } from "../types";
+import type { EvidencePackage, Incident, IncidentStatus } from "../types";
 
 export default function IncidentDetail() {
   const { id } = useParams<{ id: string }>();
@@ -23,6 +23,47 @@ export default function IncidentDetail() {
   const [actionError, setActionError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const incident = updated && updated.id === incidentId ? updated : data;
+
+  const [pkg, setPkg] = useState<EvidencePackage | null>(null);
+  const [showPkg, setShowPkg] = useState(false);
+  const [evidenceBusy, setEvidenceBusy] = useState(false);
+  const [evidenceError, setEvidenceError] = useState<string | null>(null);
+
+  async function prepare() {
+    setEvidenceBusy(true);
+    setEvidenceError(null);
+    try {
+      setPkg(await prepareEvidence(incidentId));
+      setUpdated(await getIncident(incidentId));
+    } catch (err) {
+      setEvidenceError(err instanceof Error ? err.message : "Could not prepare evidence.");
+    } finally {
+      setEvidenceBusy(false);
+    }
+  }
+
+  async function togglePackage() {
+    if (!showPkg && !pkg) {
+      try {
+        setPkg(await getEvidence(incidentId));
+      } catch (err) {
+        setEvidenceError(err instanceof Error ? err.message : "Could not load the package.");
+        return;
+      }
+    }
+    setShowPkg((v) => !v);
+  }
+
+  function downloadPackage() {
+    if (!pkg) return;
+    const blob = new Blob([JSON.stringify(pkg, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `${incident?.public_id ?? "incident"}-evidence.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  }
 
   async function move(status: IncidentStatus) {
     setBusy(true);
@@ -150,19 +191,55 @@ export default function IncidentDetail() {
 
         <GlassCard>
           <div className="flex items-center gap-2 text-sm font-medium text-slate-300">
-            <Link2 size={16} className="text-cyan-300" /> On-chain evidence
+            <Link2 size={16} className="text-cyan-300" /> Evidence
           </div>
-          <p className="mt-3 text-sm text-slate-400">
-            Status:{" "}
-            <span className={incident.evidence.anchored ? "text-emerald-300" : "text-slate-200"}>
-              {incident.evidence.anchored ? "Anchored" : "Not anchored"}
-            </span>
-          </p>
-          <dl className="mt-3 space-y-1 text-xs text-slate-500">
-            <div className="flex justify-between"><dt>Evidence hash</dt><dd>computed when anchoring</dd></div>
+
+          <dl className="mt-3 space-y-2 text-xs text-slate-500">
+            <div>
+              <dt>Evidence hash (SHA-256)</dt>
+              <dd className="mt-1 break-all font-mono text-slate-300">
+                {incident.evidence.hash ?? "not prepared yet"}
+              </dd>
+            </div>
+            <div className="flex justify-between"><dt>On-chain status</dt><dd className="text-slate-300">{incident.evidence.anchored ? "Anchored" : "Not anchored"}</dd></div>
             <div className="flex justify-between"><dt>Contract</dt><dd>not deployed yet</dd></div>
             <div className="flex justify-between"><dt>Transaction</dt><dd>{incident.evidence.tx_hash ?? "none"}</dd></div>
           </dl>
+
+          {!incident.evidence.prepared ? (
+            <button
+              disabled={evidenceBusy}
+              onClick={prepare}
+              className="mt-4 w-full rounded-xl bg-cyan-400/90 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-cyan-300 disabled:opacity-50"
+            >
+              {evidenceBusy ? "Preparing..." : "Prepare evidence package"}
+            </button>
+          ) : (
+            <div className="mt-4 space-y-2">
+              <p className="text-xs text-slate-400">
+                The package is frozen. Later status changes do not alter this hash.
+              </p>
+              <div className="flex gap-2">
+                <button onClick={togglePackage} className="flex-1 rounded-xl border border-white/15 px-3 py-1.5 text-xs text-slate-200 hover:bg-white/5">
+                  {showPkg ? "Hide package" : "Show package"}
+                </button>
+                <button onClick={downloadPackage} disabled={!pkg} className="flex-1 rounded-xl border border-white/15 px-3 py-1.5 text-xs text-slate-200 hover:bg-white/5 disabled:opacity-40">
+                  Download JSON
+                </button>
+              </div>
+              {showPkg && pkg && (
+                <pre className="max-h-56 overflow-auto rounded-xl bg-black/40 p-3 text-[11px] text-slate-300">
+                  {JSON.stringify(pkg.package, null, 2)}
+                </pre>
+              )}
+              <p className="text-xs text-slate-500">
+                Verify it yourself: download the JSON, then run{" "}
+                <span className="font-mono text-slate-300">python scripts\verify_evidence.py file.json {incident.evidence.hash?.slice(0, 10)}...</span>
+              </p>
+            </div>
+          )}
+          {evidenceError && <div className="mt-3"><ErrorNotice message={evidenceError} /></div>}
+
           <button
             disabled
             title="Wallet and contract are not connected yet"

@@ -12,6 +12,8 @@ from app.domain.incidents import (
     SyncResult,
 )
 from app.domain.models import RiskAssessment, RiskFactor, RuleFinding
+from app.evidence.canonical import evidence_hash
+from app.evidence.package import build_package, new_nonce
 from app.repositories import incidents as repo
 
 # Assessments below this score are noise: they are shown nowhere and create no incident.
@@ -38,7 +40,12 @@ def to_out(row: IncidentRow) -> IncidentOut:
         detected_at=row.detected_at,
         updated_at=row.updated_at,
         events=[IncidentEvent(at=e.at, text=e.text) for e in row.events],
-        evidence=Evidence(anchored=row.evidence_tx_hash is not None, tx_hash=row.evidence_tx_hash),
+        evidence=Evidence(
+            prepared=row.evidence_package is not None,
+            hash=row.evidence_hash,
+            anchored=row.evidence_tx_hash is not None,
+            tx_hash=row.evidence_tx_hash,
+        ),
         allowed_next=sorted(ALLOWED_TRANSITIONS[row.status]),
     )
 
@@ -95,6 +102,20 @@ def change_status(
         text += f": {note}"
     repo.add_event(row, text, now)
     row.status = new_status
+    row.updated_at = now
+    session.commit()
+    return row
+
+
+def prepare_evidence(session: Session, row: IncidentRow, now: datetime) -> IncidentRow:
+    """Freeze the evidence package once. Calling again changes nothing (idempotent)."""
+    if row.evidence_package is not None:
+        return row
+    package = build_package(row, new_nonce())
+    row.evidence_package = package
+    row.evidence_hash = evidence_hash(package)
+    row.evidence_prepared_at = now
+    repo.add_event(row, f"Evidence package prepared (hash {row.evidence_hash[:10]}...{row.evidence_hash[-6:]})", now)
     row.updated_at = now
     session.commit()
     return row

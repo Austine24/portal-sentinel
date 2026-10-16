@@ -1,8 +1,10 @@
 import type { z } from "zod";
 import {
+  evidencePackageSchema,
   incidentListSchema,
   incidentSchema,
   syncResultSchema,
+  type EvidencePackage,
   type Incident,
   type IncidentStatus,
   type SyncResult,
@@ -57,4 +59,12 @@ export function changeStatus(id: number, status: IncidentStatus, note?: string):
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ status, note: note || null }),
   });
+}
+
+export function prepareEvidence(id: number): Promise<EvidencePackage> {
+  return request(`/api/incidents/${id}/evidence/prepare`, evidencePackageSchema, { method: "POST" });
+}
+
+export function getEvidence(id: number): Promise<EvidencePackage> {
+  return request(`/api/incidents/${id}/evidence`, evidencePackageSchema);
 }

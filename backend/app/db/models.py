@@ -31,6 +31,8 @@ class IncidentRow(Base):
     # Filled in later by the on-chain evidence flow.
     evidence_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
     evidence_tx_hash: Mapped[str | None] = mapped_column(String(80), nullable=True)
+    evidence_package: Mapped[dict | None] = mapped_column(JSON, nullable=True)
+    evidence_prepared_at: Mapped[datetime | None] = mapped_column(UTCDateTime, nullable=True)
 
     events: Mapped[list["IncidentEventRow"]] = relationship(
         back_populates="incident",

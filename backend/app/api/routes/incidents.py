@@ -6,7 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.data.simulated import SimulatedSource
 from app.db.base import get_session
-from app.domain.incidents import IncidentOut, IncidentStatus, StatusChange, SyncResult
+from app.domain.incidents import (
+    EvidencePackage,
+    IncidentOut,
+    IncidentStatus,
+    StatusChange,
+    SyncResult,
+)
 from app.repositories import incidents as repo
 from app.services import incidents as service
 from app.services.detection import run_detection
@@ -53,3 +59,23 @@ def change_incident_status(incident_id: int, change: StatusChange, session: Sess
     except service.InvalidTransition as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
     return service.to_out(row)
+
+
+@router.post("/{incident_id}/evidence/prepare", response_model=EvidencePackage)
+def prepare_evidence(incident_id: int, session: SessionDep) -> EvidencePackage:
+    """Freeze this incident's evidence package and return its hash. Safe to call twice."""
+    row = repo.get(session, incident_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    row = service.prepare_evidence(session, row, datetime.now(timezone.utc))
+    return EvidencePackage(hash=row.evidence_hash, package=row.evidence_package)
+
+
+@router.get("/{incident_id}/evidence", response_model=EvidencePackage)
+def get_evidence(incident_id: int, session: SessionDep) -> EvidencePackage:
+    row = repo.get(session, incident_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Incident not found")
+    if row.evidence_package is None:
+        raise HTTPException(status_code=404, detail="Evidence has not been prepared yet")
+    return EvidencePackage(hash=row.evidence_hash, package=row.evidence_package)
