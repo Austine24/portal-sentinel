@@ -51,7 +51,14 @@ npm run dev     # http://localhost:5173
 npm run build   # type-check and build
 ```
 
+## Architecture
+![System architecture](docs/architecture.svg)
+
+Full description: `docs/ARCHITECTURE.md`. The evidence flow diagram is `docs/evidence-flow.svg`.
+
 ## Documentation
+- `docs/ARCHITECTURE.md` components, design decisions, security posture
+- `docs/DEMO_SCRIPT.md` the 3-minute demo script
 - `docs/HACKATHON_SPEC.md` competition rules and dates
 - `docs/PORTALDOT_VERIFIED_FACTS.md` what we have verified about Portaldot, and how
 - `docs/PORTAL_SENTINEL_ROADMAP.md` plan and risks

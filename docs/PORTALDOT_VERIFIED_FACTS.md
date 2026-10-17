@@ -154,7 +154,9 @@ Official sources used:
 
 ---
 
-## G. V3 testnet endpoint reports and test log (added Oct 14, 2026)
+## G. SUPERSEDED: V3 testnet endpoint reports and test log (added Oct 14, 2026)
+
+Superseded by section I. The feso-apps.xyz endpoints below are confirmed retired by the organizers.
 
 Status added by the team on Oct 14: **WORKING ASSUMPTION (pending confirmation)** = we build on it, it is NOT verified, and it flips to TESTED only when a real call succeeds, or to REFUTED when a test fails.
 
@@ -196,3 +198,33 @@ Consequences:
 - All blockchain-dependent work is blocked until the organizers publish endpoints and start tPOT distribution. This is a confirmed organizer-side delay, not a team failure. Keep a screenshot of the Discord reply as evidence.
 - Everything that does not need the chain proceeds: detection core, risk engine, API, UI, tests. Data stays labelled DEMO / SIMULATED (field `data_origin`).
 - Check-in on Oct 24 (12:00 UTC) asks for a testnet contract address and transaction hash. If the testnet is still unavailable, say so plainly in the submission, attach the organizer's statement, and ask the organizers how they want blocked teams to handle it.
+
+
+---
+
+## I. Official V3 testnet details published (Oct 16, 2026)
+
+Source: (a) an official Discord announcement titled "PortaldotV3 Testnet: Updated Network Info & Testnet Token Distribution", and (b) a reply from the Portaldot technical team to the team member's question. Both relayed by the team member, not fetched by Claude. Source type: ORGANIZER ANNOUNCEMENT. Status: **VERIFIED-ORGANIZER** (not yet TESTED by us; see the test log below).
+
+| Item | Value | Status |
+|---|---|---|
+| EVM JSON-RPC | https://test-evm-rpc-v3.portaldot.dev | VERIFIED-ORGANIZER |
+| EVM chain ID | 420420777 (unchanged from the retired endpoints) | VERIFIED-ORGANIZER |
+| Substrate WebSocket | wss://test-node-v3.portaldot.dev | VERIFIED-ORGANIZER |
+| Official node explorer / console | https://node-console.portaldot.dev | VERIFIED-ORGANIZER |
+| Previous endpoints (feso-apps.xyz) | No longer in use | VERIFIED-ORGANIZER |
+| tPOT distribution | First batch going to registered participants. If a native POT address was submitted at registration, nothing more is needed for now. Otherwise open a Discord support ticket with a registration screenshot and the native POT address (starts with `5`, not an EVM `0x` address). | VERIFIED-ORGANIZER |
+| Wallet safety | Never share a seed phrase or private key | VERIFIED-ORGANIZER |
+
+### Test log
+| Date | Test | Result |
+|---|---|---|
+| Oct 16 | Claude fetched the RPC URL with a plain GET | HTTP 405 (expected for a JSON-RPC server that wants POST). The host resolves and a server answers. This is weak evidence only. |
+| Oct 16 | Claude fetched the node console URL | Page loads, titled "Portaldot Node Console" (JavaScript app, content not read) |
+| (pending) | `python scripts/check_chain.py https://test-evm-rpc-v3.portaldot.dev 420420777` run by the team member | TO BE RECORDED |
+
+### Still UNKNOWN (ask the team)
+- How to deploy a Solidity contract with a funded native `5...` account: through MetaMask (which address receives funds, and how does the EVM `0x` address map to it?) or through extrinsics in the node console?
+- Whether plain EVM bytecode deploys directly, or contracts must be compiled for another target.
+- Whether the EVM side has a transaction explorer, or only the node console.
+- The native token ticker and decimals on V3 (the earlier guide said tPOTv3 with 14 decimals; unconfirmed).
