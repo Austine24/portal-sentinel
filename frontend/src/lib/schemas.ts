@@ -51,6 +51,7 @@ export const incidentSchema = z.object({
 
 export const evidencePackageSchema = z.object({
   hash: z.string(),
+  onchain_incident_id: z.string(),
   package: z.record(z.string(), z.unknown()),
 });
 

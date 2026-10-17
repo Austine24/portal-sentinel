@@ -108,3 +108,22 @@ def test_standalone_script_agrees_with_backend():
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "MATCH" in result.stdout
+
+
+VECTOR_INCIDENT_ID = "0x05831adf72f5c868dbac808bcdb93fde3ad0151eb3f528faf863784da9491e13"  # also computed independently in Node on 2026-10-16
+
+
+def test_onchain_incident_id_known_vector():
+    from app.evidence.canonical import onchain_incident_id
+
+    assert onchain_incident_id(json.loads(VECTOR.read_text(encoding="utf-8"))) == VECTOR_INCIDENT_ID
+
+
+def test_api_exposes_onchain_incident_id(client):
+    from app.evidence.canonical import onchain_incident_id
+
+    client.post("/api/incidents/sync")
+    incident_id = client.get("/api/incidents").json()[0]["id"]
+    body = client.post(f"/api/incidents/{incident_id}/evidence/prepare").json()
+    assert body["onchain_incident_id"] == onchain_incident_id(body["package"])
+    assert len(body["onchain_incident_id"]) == 66

@@ -201,6 +201,12 @@ export default function IncidentDetail() {
                 {incident.evidence.hash ?? "not prepared yet"}
               </dd>
             </div>
+            {pkg && (
+              <div>
+                <dt>On-chain incident id (contract key)</dt>
+                <dd className="mt-1 break-all font-mono text-slate-300">{pkg.onchain_incident_id}</dd>
+              </div>
+            )}
             <div className="flex justify-between"><dt>On-chain status</dt><dd className="text-slate-300">{incident.evidence.anchored ? "Anchored" : "Not anchored"}</dd></div>
             <div className="flex justify-between"><dt>Contract</dt><dd>not deployed yet</dd></div>
             <div className="flex justify-between"><dt>Transaction</dt><dd>{incident.evidence.tx_hash ?? "none"}</dd></div>

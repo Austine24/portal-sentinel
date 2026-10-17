@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 
 from app.data.simulated import SimulatedSource
 from app.db.base import get_session
+from app.evidence.canonical import onchain_incident_id
 from app.domain.incidents import (
     EvidencePackage,
     IncidentOut,
@@ -68,7 +69,11 @@ def prepare_evidence(incident_id: int, session: SessionDep) -> EvidencePackage:
     if row is None:
         raise HTTPException(status_code=404, detail="Incident not found")
     row = service.prepare_evidence(session, row, datetime.now(timezone.utc))
-    return EvidencePackage(hash=row.evidence_hash, package=row.evidence_package)
+    return EvidencePackage(
+        hash=row.evidence_hash,
+        onchain_incident_id=onchain_incident_id(row.evidence_package),
+        package=row.evidence_package,
+    )
 
 
 @router.get("/{incident_id}/evidence", response_model=EvidencePackage)
@@ -78,4 +83,8 @@ def get_evidence(incident_id: int, session: SessionDep) -> EvidencePackage:
         raise HTTPException(status_code=404, detail="Incident not found")
     if row.evidence_package is None:
         raise HTTPException(status_code=404, detail="Evidence has not been prepared yet")
-    return EvidencePackage(hash=row.evidence_hash, package=row.evidence_package)
+    return EvidencePackage(
+        hash=row.evidence_hash,
+        onchain_incident_id=onchain_incident_id(row.evidence_package),
+        package=row.evidence_package,
+    )

@@ -30,6 +30,7 @@ class Evidence(BaseModel):
 
 class EvidencePackage(BaseModel):
     hash: str
+    onchain_incident_id: str
     package: dict[str, Any]
 
 

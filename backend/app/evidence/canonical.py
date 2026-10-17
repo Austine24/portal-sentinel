@@ -36,3 +36,13 @@ def canonical_bytes(package: dict[str, Any]) -> bytes:
 
 def evidence_hash(package: dict[str, Any]) -> str:
     return "0x" + hashlib.sha256(canonical_bytes(package)).hexdigest()
+
+
+def onchain_incident_id(package: dict[str, Any]) -> str:
+    """The bytes32 key used in the contract: SHA-256("portal-sentinel:incident:<public_id>:<nonce>").
+
+    The nonce lives inside the package, so anyone holding the package can recompute it,
+    and nobody can predict (and reserve) the id of an incident that has not been prepared yet.
+    """
+    text = f"portal-sentinel:incident:{package['incident']['public_id']}:{package['nonce']}"
+    return "0x" + hashlib.sha256(text.encode("utf-8")).hexdigest()
