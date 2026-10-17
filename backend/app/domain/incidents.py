@@ -66,3 +66,21 @@ class SyncResult(BaseModel):
     created: int
     skipped: int
     data_origin: DataOrigin
+
+
+class RuleInfo(BaseModel):
+    rule_id: str
+    name: str
+
+
+class ModelStatusOut(BaseModel):
+    model: str
+    trained: bool
+    reason: str | None
+    training_rows: int
+    accounts: int
+    features: list[str]
+    trained_at: AwareDatetime | None
+    rules: list[RuleInfo]
+    data_origin: DataOrigin
+    note: str
