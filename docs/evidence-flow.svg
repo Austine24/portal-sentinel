@@ -19,9 +19,9 @@
   <rect x="40" y="128" width="230" height="130" rx="12" fill="#0f2a22" stroke="#34d399" stroke-width="2"/>
   <text x="62" y="156" font-size="12" fill="#6ee7b7">STEP 1</text>
   <text x="62" y="178" font-size="16" font-weight="700" fill="#e2e8f0">Detect</text>
-  <text x="62" y="202" font-size="12" fill="#cbd5e1">Rules and the risk engine score</text>
-  <text x="62" y="219" font-size="12" fill="#cbd5e1">an account against its own</text>
-  <text x="62" y="236" font-size="12" fill="#cbd5e1">baseline, with reasons.</text>
+  <text x="62" y="202" font-size="12" fill="#cbd5e1">Rules, an anomaly model and the</text>
+  <text x="62" y="219" font-size="12" fill="#cbd5e1">risk engine score an account</text>
+  <text x="62" y="236" font-size="12" fill="#cbd5e1">against its own baseline.</text>
 
   <rect x="350" y="128" width="230" height="130" rx="12" fill="#0f2a22" stroke="#34d399" stroke-width="2"/>
   <text x="372" y="156" font-size="12" fill="#6ee7b7">STEP 2</text>

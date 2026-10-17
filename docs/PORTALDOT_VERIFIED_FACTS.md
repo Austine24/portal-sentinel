@@ -221,10 +221,74 @@ Source: (a) an official Discord announcement titled "PortaldotV3 Testnet: Update
 |---|---|---|
 | Oct 16 | Claude fetched the RPC URL with a plain GET | HTTP 405 (expected for a JSON-RPC server that wants POST). The host resolves and a server answers. This is weak evidence only. |
 | Oct 16 | Claude fetched the node console URL | Page loads, titled "Portaldot Node Console" (JavaScript app, content not read) |
-| (pending) | `python scripts/check_chain.py https://test-evm-rpc-v3.portaldot.dev 420420777` run by the team member | TO BE RECORDED |
+| Oct 17 | `check_chain.py` run by the team member against the EVM RPC | With Python's default User-Agent: HTTP 403, `Server: cloudflare`, body `error code: 1010`. With a descriptive User-Agent: chain id **420420777 (matches)**, latest block **75331**. **TESTED.** |
 
 ### Still UNKNOWN (ask the team)
 - How to deploy a Solidity contract with a funded native `5...` account: through MetaMask (which address receives funds, and how does the EVM `0x` address map to it?) or through extrinsics in the node console?
 - Whether plain EVM bytecode deploys directly, or contracts must be compiled for another target.
 - Whether the EVM side has a transaction explorer, or only the node console.
 - The native token ticker and decimals on V3 (the earlier guide said tPOTv3 with 14 decimals; unconfirmed).
+
+
+---
+
+## J. Consequence of the 403: the public RPC sits behind Cloudflare (tested Oct 17)
+
+- FACT (tested): the EVM RPC rejects Python's default User-Agent (Cloudflare error 1010) and accepts a descriptive one.
+- Our own clients (backend chain client, scripts) must send an honest descriptive User-Agent. We do not impersonate browsers.
+- Other tools (Hardhat, ethers, viem, web3.py) may be rejected the same way. If one is, set a custom User-Agent header in that tool.
+- Status: TESTED for `check_chain.py`. Not yet tested for any other client.
+
+## K. Deployment questions: still open (Discord, Oct 17)
+
+Source: reply from the Portaldot community team relayed by the team member. Status: **the team does not know yet and has escalated to the core developers.**
+
+Open questions (do not assume any answer):
+1. Account mapping and gas: how does an `0x` account (MetaMask/Hardhat) use tPOT held by a native `5...` account?
+2. Deployment method: directly through the EVM JSON-RPC, or through Substrate extrinsics?
+3. Compilation target: plain EVM bytecode, or something specific to `revive`?
+
+The reply also says "the V3 technical documentation describes Solidity support through `revive`". We have not seen that document.
+
+## L. What public pallet-revive documentation says in general (NOT Portaldot-specific; UNVERIFIED for Portaldot V3)
+
+Sources: Polymesh developer docs, Polkadot developer docs, the revive compiler book, an OpenGuild tutorial. These describe other chains that use the same pallet. Portaldot V3 may differ.
+
+- A separate proxy (`eth-rpc`) translates Ethereum JSON-RPC into node calls, which is what lets MetaMask and Hardhat talk to such chains.
+- Account mapping exists in general: an account should call `map_account` before receiving tokens at its Ethereum-style address. Until it does, tokens sent to that address are credited to a separate 0xEE-padded "fallback" account.
+- One doc says plain `solc` EVM bytecode runs with full EVM compatibility on that chain; the Polkadot docs say Solidity is compiled with `resolc` into PolkaVM bytecode (`@parity/resolc`, `hardhat-polkadot`). Different networks and versions disagree, which is exactly open question 3.
+- Deployment and funding can go through Substrate extrinsics (`revive.instantiateWithCode`, `revive.call`) as well as through Ethereum tooling.
+
+What this changes for us: nothing is decided. Questions 1 to 3 can partly be answered by looking at the node console (does a `revive` pallet exist, which extrinsics does it have, what are the token decimals) and by a test deployment once funds arrive.
+
+---
+
+## M. Observations from the official node console (screenshots by the team member, Oct 17, about 20:20 Lagos time)
+
+Source: https://node-console.portaldot.dev, viewed in a browser. Source type: official explorer UI, seen directly by the team member (Claude saw the screenshots, not the live site). Status: **VERIFIED-OBSERVED** for what the screens show.
+
+| Item | What the console showed |
+|---|---|
+| Network label | "PortaldotV3 Live" |
+| Runtime | portaldot-v3/3001; node v3.0.0; chain type substrate |
+| Token | unit POT, 14 decimals, address prefix 42 (matches the older v1 docs) |
+| Genesis hash | 0x6e7f1f24628d2fa3a1ac81a8b45157c63b1037fee4123a7664aae2c55cdbbc36 |
+| Height | best 677,575, finalized 677,573 (finality lag 2 blocks at that moment); another view showed 677,623 a few minutes later |
+| Block time | 6.000 s average |
+| Issuance | total 938.5536 MPOT, inactive 17.8709 MPOT (M is the SI prefix for million) |
+| Block authors | In the 9 blocks shown, 8 were authored by 5F4ZvJJ8R3Q... and 1 by 5Gri5uKAod... (a very small sample) |
+| Activity | One `balances.Transfer` event in roughly 50 seconds. The chain looks quiet. |
+| Extrinsics | A `revive` pallet exists, including `batchMapAccounts(accounts)` ("Map many accounts and make the TX free if at least 90% were unmapped or held deposits") |
+| Accounts | The console had no accounts configured for the team member ("No accounts are available for selection") |
+
+### What this settles
+- The runtime contains pallet-revive. This is consistent with Solidity support through `revive`, as the organizers said. It does not yet tell us the compile target or deployment route (open questions in section K).
+- Block time is 6 s, so our collector should poll about every 6 s, not faster.
+- The chain is quiet, so real activity for anomaly detection will be scarce. We will need to generate our own labelled test activity once funded.
+
+### OPEN: is the console showing the testnet?
+- The console says "PortaldotV3 Live" at block about 677,600.
+- Earlier today the testnet EVM RPC reported latest block 75331. At 6 s per block, 677,600 blocks is about 47 days and 75,331 blocks is about 5 days, so a 600,000-block gap cannot be explained by time passing.
+- Possible explanations: the console is connected to a different V3 network than the testnet RPC; or the EVM proxy numbers blocks differently. UNKNOWN which.
+- How to settle it: run `python scripts/inspect_chain.py`. It prints the EVM view of block 0, the Substrate genesis hash from `https://test-node-v3.portaldot.dev` (if that answers over HTTPS) and warns when heights differ greatly. Compare the genesis hash with the console's value above. Also check the console's network selector (top left) for a testnet entry.
+- Until this is settled, do not assume transactions sent through the EVM RPC will appear in the console.

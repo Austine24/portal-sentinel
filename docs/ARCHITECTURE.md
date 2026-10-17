@@ -19,7 +19,7 @@ Status as of 2026-10-17. All transaction data is **DEMO / SIMULATED** until a li
 | SimulatedSource | Deterministic generator, labelled DEMO / SIMULATED on every record (`data_origin`). | Built |
 | PortaldotSource | Reads live testnet data through the same interface. | Planned (endpoints now announced) |
 | Rule engine | SR-001 Transaction Burst and SR-002 Value Anomaly, each compared with the account's own baseline. | Built |
-| Isolation Forest | Unsupervised anomaly score as a third signal. | Planned |
+| Isolation Forest (ML-001) | Unsupervised anomaly signal. Each hour is compared with its own account's normal; the score becomes a percentile with explained feature shifts. See `AI_MODEL.md`. | Built |
 | Risk engine | Noisy-OR combination of weighted findings, Low to Critical bands, explained factors. | Built |
 | Incident service | Status workflow with legal transitions, audit timeline, duplicate protection. | Built |
 | Evidence service | Frozen canonical JSON, SHA-256 hash, on-chain incident id. | Built |
@@ -54,7 +54,7 @@ Not yet implemented, and stated plainly:
 - **No authentication** on the API. Acceptable on localhost only; required before any public deployment.
 - **One owner key** controls recording on the contract. A stolen key could record false evidence but could never alter or
   delete existing records.
-- Rule thresholds are reasonable starting points, not tuned on real network data.
+- Rule and model thresholds are reasonable starting points, not tuned on real network data.
 - The contract has not run on Portaldot. Whether plain EVM bytecode deploys directly there is unconfirmed.
 
 ## What a record proves

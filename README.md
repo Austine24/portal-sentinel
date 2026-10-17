@@ -10,13 +10,14 @@ Monitor. Detect. Investigate. Verify.
 
 ## What exists so far
 - Rule engine (transaction burst, value anomaly) with per-account baselines and explained evidence
+- Isolation Forest anomaly model (ML-001) that compares each hour with the account's own normal and explains the shift (`docs/AI_MODEL.md`)
 - Risk engine with configurable weights and risk bands
 - Incident workflow (status transitions, audit timeline) stored in MySQL/MariaDB
 - Evidence packages: frozen, canonical JSON per incident with a SHA-256 hash, plus a standalone verifier (`scripts/verify_evidence.py`, standard library only)
 - React dashboard, incident list and detail pages talking to the API
 - Read-only chain connectivity check script
 
-Not built yet: live Portaldot data, Isolation Forest model, wallet, on-chain evidence contract, authentication.
+Not built yet: live Portaldot data ingestion, wallet, deployment of the evidence contract, authentication.
 
 ## Run the backend
 ```powershell
@@ -58,13 +59,14 @@ Full description: `docs/ARCHITECTURE.md`. The evidence flow diagram is `docs/evi
 
 ## Documentation
 - `docs/ARCHITECTURE.md` components, design decisions, security posture
+- `docs/AI_MODEL.md` how the anomaly model works and its limits
 - `docs/DEMO_SCRIPT.md` the 3-minute demo script
 - `docs/HACKATHON_SPEC.md` competition rules and dates
 - `docs/PORTALDOT_VERIFIED_FACTS.md` what we have verified about Portaldot, and how
 - `docs/PORTAL_SENTINEL_ROADMAP.md` plan and risks
 
 ## Third-party software
-FastAPI, Uvicorn, Pydantic, pydantic-settings, SQLAlchemy, PyMySQL, cryptography, Alembic (backend);
+FastAPI, Uvicorn, Pydantic, pydantic-settings, SQLAlchemy, PyMySQL, cryptography, Alembic, scikit-learn with NumPy and SciPy (backend);
 React, Vite, Tailwind CSS, React Router, Recharts, Framer Motion, Lucide, Zod (frontend).
 
 ## Verify an evidence hash yourself
@@ -73,3 +75,10 @@ On an incident page press "Prepare evidence package", then "Download JSON", then
 python scripts\verify_evidence.py INC-00001-evidence.json 0xTHE_HASH_SHOWN_IN_THE_UI
 ```
 It prints `MATCH` when the recomputed hash equals the one shown (or the one anchored on-chain later).
+
+## Inspect the Portaldot testnet (read-only)
+```powershell
+python scripts\check_chain.py https://test-evm-rpc-v3.portaldot.dev 420420777
+python scripts\inspect_chain.py
+```
+Both send only read requests, with a descriptive User-Agent (the public RPC rejects Python's default one).
