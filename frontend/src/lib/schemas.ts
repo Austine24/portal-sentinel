@@ -69,3 +69,18 @@ export type DataOrigin = z.infer<typeof originSchema>;
 export type Incident = z.infer<typeof incidentSchema>;
 export type SyncResult = z.infer<typeof syncResultSchema>;
 export type EvidencePackage = z.infer<typeof evidencePackageSchema>;
+
+export const modelStatusSchema = z.object({
+  model: z.string(),
+  trained: z.boolean(),
+  reason: z.string().nullable(),
+  training_rows: z.number(),
+  accounts: z.number(),
+  features: z.array(z.string()),
+  trained_at: z.string().nullable(),
+  rules: z.array(z.object({ rule_id: z.string(), name: z.string() })),
+  data_origin: originSchema,
+  note: z.string(),
+});
+
+export type ModelStatus = z.infer<typeof modelStatusSchema>;

@@ -77,6 +77,13 @@ export default function IncidentDetail() {
     }
   }
 
+  const modelFinding = incident?.findings.find((f) => f.rule_id === "ML-001");
+  const percentile = modelFinding?.evidence.anomaly_percentile;
+  const modelText =
+    modelFinding && typeof percentile === "number"
+      ? `Anomaly model: more unusual than ${percentile >= 0.9995 ? "all" : (percentile * 100).toFixed(1) + "%"} of the past account-hours it learned from`
+      : "Anomaly model: did not flag this account";
+
   const back = (
     <Link to="/incidents" className="inline-flex items-center gap-1 text-sm text-slate-400 hover:text-slate-200">
       <ArrowLeft size={14} /> Incidents
@@ -110,7 +117,7 @@ export default function IncidentDetail() {
         <GlassCard className="flex flex-col items-center justify-center gap-3">
           <RiskGauge score={incident.risk_score} />
           <p className="text-center text-xs text-slate-500">Account: {incident.account}</p>
-          <p className="text-center text-xs text-slate-500">Anomaly model score: not available yet (model not trained)</p>
+          <p className="text-center text-xs text-slate-500">{modelText}</p>
         </GlassCard>
 
         <GlassCard className="lg:col-span-2">

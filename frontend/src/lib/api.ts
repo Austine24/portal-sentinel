@@ -3,9 +3,11 @@ import {
   evidencePackageSchema,
   incidentListSchema,
   incidentSchema,
+  modelStatusSchema,
   syncResultSchema,
   type EvidencePackage,
   type Incident,
+  type ModelStatus,
   type IncidentStatus,
   type SyncResult,
 } from "./schemas";
@@ -67,4 +69,8 @@ export function prepareEvidence(id: number): Promise<EvidencePackage> {
 
 export function getEvidence(id: number): Promise<EvidencePackage> {
   return request(`/api/incidents/${id}/evidence`, evidencePackageSchema);
+}
+
+export function getModelStatus(): Promise<ModelStatus> {
+  return request("/api/model/status", modelStatusSchema);
 }

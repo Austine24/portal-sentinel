@@ -4,6 +4,7 @@ export type {
   EvidencePackage,
   Incident,
   IncidentStatus,
+  ModelStatus,
   RiskLevel,
   SyncResult,
 } from "./lib/schemas";
