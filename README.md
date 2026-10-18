@@ -76,9 +76,13 @@ python scripts\verify_evidence.py INC-00001-evidence.json 0xTHE_HASH_SHOWN_IN_TH
 ```
 It prints `MATCH` when the recomputed hash equals the one shown (or the one anchored on-chain later).
 
+## License
+MIT. See `LICENSE`. The contract file declares the same license in its SPDX header.
+
 ## Inspect the Portaldot testnet (read-only)
 ```powershell
 python scripts\check_chain.py https://test-evm-rpc-v3.portaldot.dev 420420777
 python scripts\inspect_chain.py
+python scripts\probe_substrate.py --balance <your 5... address>
 ```
-Both send only read requests, with a descriptive User-Agent (the public RPC rejects Python's default one).
+All send only read requests, with a descriptive User-Agent (the public RPC rejects Python's default one).

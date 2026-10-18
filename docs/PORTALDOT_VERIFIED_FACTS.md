@@ -292,3 +292,41 @@ Source: https://node-console.portaldot.dev, viewed in a browser. Source type: of
 - Possible explanations: the console is connected to a different V3 network than the testnet RPC; or the EVM proxy numbers blocks differently. UNKNOWN which.
 - How to settle it: run `python scripts/inspect_chain.py`. It prints the EVM view of block 0, the Substrate genesis hash from `https://test-node-v3.portaldot.dev` (if that answers over HTTPS) and warns when heights differ greatly. Compare the genesis hash with the console's value above. Also check the console's network selector (top left) for a testnet entry.
 - Until this is settled, do not assume transactions sent through the EVM RPC will appear in the console.
+
+
+---
+
+## N. Testnet identity settled (Oct 17, about 19:55 UTC), TESTED with `inspect_chain.py`
+
+Source: output of `python scripts/inspect_chain.py`, run by the team member against the announced testnet endpoints. Status: **TESTED**.
+
+| Item | Result |
+|---|---|
+| EVM RPC client | `eth-rpc/main-fddd431/x86_64-unknown-linux-gnu/rustc1.98.0` (an Ethereum-JSON-RPC proxy in front of the node) |
+| EVM chain id | 420420777 (matches the announcement) |
+| EVM latest block | 78712, newest block 26 s old, blocks 6 s apart |
+| Transactions | **0 in the last 30 blocks**. The testnet is quiet. |
+| Gas price | raw 41065 (units not yet interpreted) |
+| Substrate node over HTTPS | `https://test-node-v3.portaldot.dev` answers JSON-RPC over HTTPS |
+| Chain name | "PortaldotV3 Test" |
+| Token | tPOT, 14 decimals, address prefix 42 |
+| Runtime | portaldot-v3, spec version **3002** |
+| Genesis hash (testnet) | 0xd4f9acbcf7f52388d8b095abe3c198d19fc510e0343e643e87cfbccb155283bd |
+| Substrate best block | 78716 |
+| Node health | peers=1, syncing=False (as reported by that one node; meaning not yet understood) |
+
+### Settled: the EVM RPC and the Substrate test node are the same chain
+Heights 78712 and 78716 are four blocks apart, and the Substrate node names it "PortaldotV3 Test".
+
+### Settled: the console screenshots in section M were of a DIFFERENT network
+`node-console.portaldot.dev` opens on **"PortaldotV3 Live"**: runtime spec 3001, genesis 0x6e7f1f24..., block 677,000+. The testnet is listed separately in the network selector under **TEST NETWORKS, "PortaldotV3 Testnet"** (seen in a screenshot; the team member had not yet switched to it).
+- Everything in section M describes **Live**, not the testnet.
+- The `revive` pallet was seen on Live (spec 3001). Whether the testnet (spec 3002) has the same calls must be re-checked after switching the console to the testnet.
+- Do not deploy anything to Live.
+
+### Decision: no `substrate-interface` library
+A pip dry run of `substrate-interface` on Python 3.14 / Windows stalled while preparing `py-ed25519-zebra-bindings` from source, which needs a Rust toolchain. We only read data, so we use plain JSON-RPC over HTTPS plus small decoders (`scripts/probe_substrate.py`). Its hashing was checked against the reference xxHash library (zero differences over 166 inputs), and the storage key built for the well-known Alice test account matches the published value.
+
+### Still unknown
+- Whether the team's tPOT has arrived (check with `probe_substrate.py --balance`).
+- The deployment questions in section K (account mapping, deployment route, compile target).
