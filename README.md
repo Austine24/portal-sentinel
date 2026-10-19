@@ -4,9 +4,9 @@ Security intelligence for the Portaldot ecosystem. Built for Portaldot Hacker Ho
 
 Monitor. Detect. Investigate. Verify.
 
-> Status: early development. This page describes what exists today. All transaction data is currently
-> DEMO / SIMULATED (field `data_origin`); no live Portaldot data source is connected yet because the
-> V3 testnet endpoints have not been published by the organizers (see `docs/PORTALDOT_VERIFIED_FACTS.md`).
+> Status: early development. This page describes what exists today. **Network-health data is LIVE** from the Portaldot V3
+> testnet. **Transaction data is DEMO / SIMULATED** (field `data_origin`) because the testnet currently carries almost no
+> transactions; see `docs/PORTALDOT_VERIFIED_FACTS.md`.
 
 ## What exists so far
 - Rule engine (transaction burst, value anomaly) with per-account baselines and explained evidence
@@ -15,9 +15,10 @@ Monitor. Detect. Investigate. Verify.
 - Incident workflow (status transitions, audit timeline) stored in MySQL/MariaDB
 - Evidence packages: frozen, canonical JSON per incident with a SHA-256 hash, plus a standalone verifier (`scripts/verify_evidence.py`, standard library only)
 - React dashboard, incident list and detail pages talking to the API
+- **Network health monitoring on live Portaldot testnet data** (block authors, finality lag, missed slots, stalled production) with a Network page; see `docs/NETWORK_HEALTH.md`
 - Read-only chain connectivity check script
 
-Not built yet: live Portaldot data ingestion, wallet, deployment of the evidence contract, authentication.
+Not built yet: live transaction ingestion, wallet, deployment of the evidence contract, authentication.
 
 ## Run the backend
 ```powershell
@@ -59,6 +60,7 @@ Full description: `docs/ARCHITECTURE.md`. The evidence flow diagram is `docs/evi
 
 ## Documentation
 - `docs/ARCHITECTURE.md` components, design decisions, security posture
+- `docs/NETWORK_HEALTH.md` live network monitoring: signals, rules, limits
 - `docs/AI_MODEL.md` how the anomaly model works and its limits
 - `docs/DEMO_SCRIPT.md` the 3-minute demo script
 - `docs/HACKATHON_SPEC.md` competition rules and dates

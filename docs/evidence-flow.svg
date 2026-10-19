@@ -6,7 +6,7 @@
   </defs>
   <rect width="1200" height="600" rx="18" fill="url(#bg)"/>
   <text x="40" y="52" font-size="26" font-weight="700" fill="#e2e8f0">Evidence flow: from detection to verifiable proof</text>
-  <text x="40" y="78" font-size="13" fill="#94a3b8">What was this incident, and can anyone check it later? Status as of 2026-10-17. On-chain steps wait for a funded testnet wallet.</text>
+  <text x="40" y="78" font-size="13" fill="#94a3b8">What was this incident, and can anyone check it later? Status as of 2026-10-18. On-chain steps wait for a funded testnet wallet.</text>
   <rect x="840" y="34" width="14" height="14" rx="3" fill="#0f2a22" stroke="#34d399" stroke-width="2"/>
   <text x="862" y="46" font-size="12" fill="#cbd5e1">built and tested</text>
   <rect x="980" y="34" width="14" height="14" rx="3" fill="#2a2210" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4 3"/>

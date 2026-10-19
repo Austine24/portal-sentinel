@@ -330,3 +330,29 @@ A pip dry run of `substrate-interface` on Python 3.14 / Windows stalled while pr
 ### Still unknown
 - Whether the team's tPOT has arrived (check with `probe_substrate.py --balance`).
 - The deployment questions in section K (account mapping, deployment route, compile target).
+
+
+---
+
+## O. Live probe and testnet console observations (Oct 18, about 07:00 UTC)
+
+Sources: output of `scripts/probe_substrate.py` run by the team member, and screenshots of the node console switched to **PortaldotV3 Testnet**. Status: **TESTED / VERIFIED-OBSERVED**.
+
+| Item | Result |
+|---|---|
+| Block production engine | **BABE** (header digest decoded successfully on the first try) |
+| Block authors | 2 distinct authors, indexes 0 and 1, alternating (10 and 10 of the last 20 blocks) |
+| Slots | Consecutive: slot number rises by exactly 1 per block, so no missed slots in the 20 blocks examined |
+| Finality | best 85279, finalized 85276, lag 3 blocks. The console showed lag 2 a moment later. |
+| Derived block time | slot x 6 s matched wall-clock time within minutes (DERIVED, not read from the runtime) |
+| Console (testnet) | "PortaldotV3 Test", runtime portaldot-v3/3002, node v3.0.0, average block time 6.000 s |
+| Issuance (testnet) | total about 20.04 MtPOT (million), inactive 40,031 tPOT |
+| Recent events (testnet) | "No events available" in the visible blocks. The testnet is quiet. |
+| The same two block-author addresses | appeared in both the Live and Test console screenshots (5F4ZvJJ8R3Q... and 5Gri5uKAod...). Observation only. |
+| Registered address balance | 0.0000 tPOT at the time of the probe. The address is valid (prefix 42, checksum correct). Tokens had not arrived yet. |
+
+### `revive` pallet on the TESTNET runtime (spec 3002)
+Calls seen in the console's extrinsic list: `batchMapAccounts`, `call`, `dispatchAsFallbackAccount`, `ethCall`, `ethInstantiateWithCode`, `ethSubstrateCall` (the list was cut off, more may exist).
+- VERIFIED-OBSERVED: these calls exist on the testnet.
+- INFERRED, NOT YET TESTED: `ethCall` and `ethInstantiateWithCode` take an encoded Ethereum transaction, which is what an Ethereum-JSON-RPC proxy submits. This suggests contracts can be deployed through the EVM RPC with ordinary Ethereum tools.
+- STILL UNKNOWN (section K, question 3): whether the `code` accepted is plain EVM bytecode or another target. A real test deployment will answer it once funds arrive.

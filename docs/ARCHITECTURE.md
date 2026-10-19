@@ -3,7 +3,7 @@
 Portal Sentinel is a security intelligence and observability layer for the Portaldot ecosystem. It turns raw activity into
 **explained risk**, tracks each alert as an **incident**, and can anchor a **tamper-evident fingerprint** of an incident on-chain.
 
-Status as of 2026-10-17. All transaction data is **DEMO / SIMULATED** until a live Portaldot data source is connected.
+Status as of 2026-10-18. Transaction data is **DEMO / SIMULATED** until a live transaction source is connected (the testnet currently carries almost no transactions). **Network-health data is LIVE** and read from the Portaldot testnet.
 
 ![System architecture](architecture.svg)
 
@@ -17,7 +17,9 @@ Status as of 2026-10-17. All transaction data is **DEMO / SIMULATED** until a li
 | FastAPI backend | REST API, input validation (Pydantic), strict CORS, clean error handling. | Built |
 | DataSource interface | The adapter. Everything above it is unaware of where transactions come from. | Built |
 | SimulatedSource | Deterministic generator, labelled DEMO / SIMULATED on every record (`data_origin`). | Built |
-| PortaldotSource | Reads live testnet data through the same interface. | Planned (endpoints now announced) |
+| PortaldotSource | Reads live testnet transactions through the same interface. | Planned (the testnet showed 0 transactions in 30 blocks, so activity must be generated once funded) |
+| Network health collector | Read-only JSON-RPC to the testnet node: block authors, finality lag, missed slots, block age. Batched requests and a block cache keep load on the public node low. Snapshots are stored in MySQL. See `NETWORK_HEALTH.md`. | Built, tested against mock nodes and decoded real headers |
+| Network rules NH-001 to NH-004 | Finality lag, missed slots, stalled production, a block author going silent. | Built |
 | Rule engine | SR-001 Transaction Burst and SR-002 Value Anomaly, each compared with the account's own baseline. | Built |
 | Isolation Forest (ML-001) | Unsupervised anomaly signal. Each hour is compared with its own account's normal; the score becomes a percentile with explained feature shifts. See `AI_MODEL.md`. | Built |
 | Risk engine | Noisy-OR combination of weighted findings, Low to Critical bands, explained factors. | Built |
