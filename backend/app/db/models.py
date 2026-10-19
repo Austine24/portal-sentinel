@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import JSON, ForeignKey, Index, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Float, ForeignKey, Index, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base, UTCDateTime
@@ -51,3 +51,23 @@ class IncidentEventRow(Base):
     text: Mapped[str] = mapped_column(String(500))
 
     incident: Mapped[IncidentRow] = relationship(back_populates="events")
+
+
+class NetworkSnapshotRow(Base):
+    __tablename__ = "network_snapshots"
+    __table_args__ = (Index("ix_network_snapshots_taken_at", "taken_at"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    taken_at: Mapped[datetime] = mapped_column(UTCDateTime)
+    chain_name: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    best_block: Mapped[int] = mapped_column(Integer)
+    finalized_block: Mapped[int] = mapped_column(Integer)
+    finality_lag: Mapped[int] = mapped_column(Integer)
+    window_blocks: Mapped[int] = mapped_column(Integer)
+    missed_slots: Mapped[int] = mapped_column(Integer)
+    authors: Mapped[dict] = mapped_column(JSON)
+    distinct_authors: Mapped[int] = mapped_column(Integer)
+    max_author_share: Mapped[float | None] = mapped_column(Float, nullable=True)
+    block_age_s: Mapped[float | None] = mapped_column(Float, nullable=True)
+    peers: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    data_origin: Mapped[str] = mapped_column(String(16), default="live")

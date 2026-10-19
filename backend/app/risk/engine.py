@@ -10,7 +10,8 @@ from app.domain.models import DataOrigin, RiskAssessment, RiskFactor, RiskLevel,
 class RiskConfig:
     # How much each rule is trusted, 0 to 1. Tune these without touching any code logic.
     rule_weights: dict[str, float] = field(
-        default_factory=lambda: {"SR-001": 0.85, "SR-002": 0.75, "ML-001": 0.6}
+        default_factory=lambda: {"SR-001": 0.85, "SR-002": 0.75, "ML-001": 0.6,
+                 "NH-001": 0.8, "NH-002": 0.8, "NH-003": 0.8, "NH-004": 0.7}
     )
     default_weight: float = 0.5
 

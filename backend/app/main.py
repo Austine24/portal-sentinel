@@ -9,6 +9,8 @@ from app.api.routes.assessments import router as assessments_router
 from app.api.routes.evidence import router as evidence_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.model import router as model_router
+from app.api.routes.network import router as network_router
+from app.portaldot.rpc import RpcError, RpcUnavailable
 from app.core.config import get_settings
 
 settings = get_settings()
@@ -28,6 +30,7 @@ app.include_router(assessments_router)
 app.include_router(incidents_router)
 app.include_router(evidence_router)
 app.include_router(model_router)
+app.include_router(network_router)
 
 
 @app.get("/health")
@@ -52,3 +55,18 @@ async def database_not_ready(request: Request, exc: ProgrammingError) -> JSONRes
         status_code=503,
         content={"detail": "The database schema is not ready. Run: alembic upgrade head"},
     )
+
+
+@app.exception_handler(RpcUnavailable)
+async def node_unreachable(request: Request, exc: RpcUnavailable) -> JSONResponse:
+    logger.error("portaldot node unavailable on %s %s (%s)", request.method, request.url.path, exc)
+    return JSONResponse(
+        status_code=503,
+        content={"detail": "The Portaldot node could not be reached, or it refused the request. Try again shortly."},
+    )
+
+
+@app.exception_handler(RpcError)
+async def node_error(request: Request, exc: RpcError) -> JSONResponse:
+    logger.error("portaldot node returned an error on %s %s (%s)", request.method, request.url.path, exc)
+    return JSONResponse(status_code=502, content={"detail": "The Portaldot node returned an error."})

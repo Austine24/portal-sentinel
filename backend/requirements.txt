@@ -3,6 +3,4 @@ uvicorn
 pydantic-settings
 sqlalchemy
 pymysql
-cryptography
 alembic
-scikit-learn
