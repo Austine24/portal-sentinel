@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard";
 import IncidentDetail from "./pages/IncidentDetail";
 import Incidents from "./pages/Incidents";
 import Landing from "./pages/Landing";
+import NetworkPage from "./pages/Network";
 
 function NotFound() {
   return (
@@ -23,6 +24,7 @@ export default function App() {
       <Route path="/" element={<Landing />} />
       <Route element={<Layout />}>
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/network" element={<NetworkPage />} />
         <Route path="/incidents" element={<Incidents />} />
         <Route path="/incidents/:id" element={<IncidentDetail />} />
         <Route path="/ai" element={<AiIntelligence />} />

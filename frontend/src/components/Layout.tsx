@@ -1,9 +1,11 @@
-import { Activity, Brain, LayoutDashboard, ShieldAlert } from "lucide-react";
+import { Activity, Brain, LayoutDashboard, Network, ShieldAlert } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
+import { ConnectionStatus } from "./ConnectionStatus";
 import { DemoBadge } from "./DemoBadge";
 
 const NAV = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/network", label: "Network", icon: Network },
   { to: "/incidents", label: "Incidents", icon: ShieldAlert },
   { to: "/ai", label: "AI Intelligence", icon: Brain },
 ];
@@ -38,11 +40,8 @@ export function Layout() {
 
       <div className="min-w-0 flex-1">
         <header className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-6 py-3">
-          <div className="flex items-center gap-3 text-sm text-slate-300">
-            <span className="inline-block h-2 w-2 rounded-full bg-slate-500" />
-            Portaldot connection: <span className="text-slate-400">not connected (prototype)</span>
-          </div>
-          <DemoBadge label="DATA IS DEMO / SIMULATED UNTIL PORTALDOT IS CONNECTED" />
+          <ConnectionStatus />
+          <DemoBadge label="TRANSACTIONS: DEMO / SIMULATED · NETWORK HEALTH: LIVE" />
         </header>
         <main className="mx-auto max-w-6xl p-6">
           <Outlet />

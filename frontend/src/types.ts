@@ -5,6 +5,8 @@ export type {
   Incident,
   IncidentStatus,
   ModelStatus,
+  NetworkHealth,
+  NetworkHistory,
   RiskLevel,
   SyncResult,
 } from "./lib/schemas";

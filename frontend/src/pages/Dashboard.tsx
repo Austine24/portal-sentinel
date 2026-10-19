@@ -10,12 +10,14 @@ import { Page } from "../components/Page";
 import { SeverityBadge } from "../components/SeverityBadge";
 import { DEMO_ANOMALY_TREND } from "../data/demo";
 import { useAsync } from "../hooks/useAsync";
-import { listIncidents, syncIncidents } from "../lib/api";
+import { listIncidents, refreshNetwork, syncIncidents } from "../lib/api";
 import { STATUS_LABEL } from "../lib/risk";
 
 export default function Dashboard() {
   const load = useCallback(() => listIncidents(), []);
   const { data, error, loading, reload } = useAsync(load);
+  const loadNetwork = useCallback(() => refreshNetwork(), []);
+  const network = useAsync(loadNetwork);
   const [syncing, setSyncing] = useState(false);
   const [syncMessage, setSyncMessage] = useState<string | null>(null);
   const [syncError, setSyncError] = useState<string | null>(null);
@@ -62,7 +64,12 @@ export default function Dashboard() {
         <KpiCard label="Active incidents" value={loading ? "..." : active} hint="Open or investigating" icon={<ShieldAlert size={20} />} />
         <KpiCard label="High or critical" value={loading ? "..." : highOrAbove} hint="Risk score 60 and above" icon={<AlertTriangle size={20} />} />
         <KpiCard label="Total incidents" value={loading ? "..." : incidents.length} hint="Stored in the database" icon={<Radar size={20} />} />
-        <KpiCard label="Block height" value="Unavailable" hint="Not connected to Portaldot yet" icon={<Activity size={20} />} />
+        <KpiCard
+          label="Block height (live)"
+          value={network.data ? network.data.snapshot.best_block.toLocaleString() : network.loading ? "..." : "Unavailable"}
+          hint={network.data ? `Portaldot testnet, finality lag ${network.data.snapshot.finality_lag}` : "Could not reach the Portaldot node"}
+          icon={<Activity size={20} />}
+        />
       </div>
 
       <div className="grid gap-4 lg:grid-cols-3">

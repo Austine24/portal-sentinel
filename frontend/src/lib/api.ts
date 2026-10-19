@@ -4,10 +4,14 @@ import {
   incidentListSchema,
   incidentSchema,
   modelStatusSchema,
+  networkHealthSchema,
+  networkHistorySchema,
   syncResultSchema,
   type EvidencePackage,
   type Incident,
   type ModelStatus,
+  type NetworkHealth,
+  type NetworkHistory,
   type IncidentStatus,
   type SyncResult,
 } from "./schemas";
@@ -73,4 +77,12 @@ export function getEvidence(id: number): Promise<EvidencePackage> {
 
 export function getModelStatus(): Promise<ModelStatus> {
   return request("/api/model/status", modelStatusSchema);
+}
+
+export function refreshNetwork(): Promise<NetworkHealth> {
+  return request("/api/network/refresh", networkHealthSchema, { method: "POST" });
+}
+
+export function getNetworkHistory(limit = 60): Promise<NetworkHistory> {
+  return request(`/api/network/history?limit=${limit}`, networkHistorySchema);
 }

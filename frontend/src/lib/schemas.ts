@@ -84,3 +84,44 @@ export const modelStatusSchema = z.object({
 });
 
 export type ModelStatus = z.infer<typeof modelStatusSchema>;
+
+export const networkSnapshotSchema = z.object({
+  taken_at: z.string(),
+  chain_name: z.string().nullable(),
+  best_block: z.number(),
+  finalized_block: z.number(),
+  finality_lag: z.number(),
+  window_blocks: z.number(),
+  missed_slots: z.number(),
+  authors: z.record(z.string(), z.number()),
+  distinct_authors: z.number(),
+  max_author_share: z.number().nullable(),
+  block_age_s: z.number().nullable(),
+  peers: z.number().nullable(),
+  data_origin: originSchema,
+});
+
+export const networkHealthSchema = z.object({
+  snapshot: networkSnapshotSchema,
+  findings: z.array(findingSchema),
+  risk_score: z.number(),
+  level: riskLevelSchema,
+  cached: z.boolean(),
+  note: z.string(),
+});
+
+export const networkHistorySchema = z.array(
+  z.object({
+    taken_at: z.string(),
+    best_block: z.number(),
+    finality_lag: z.number(),
+    missed_slots: z.number(),
+    distinct_authors: z.number(),
+    max_author_share: z.number().nullable(),
+    block_age_s: z.number().nullable(),
+    data_origin: originSchema,
+  }),
+);
+
+export type NetworkHealth = z.infer<typeof networkHealthSchema>;
+export type NetworkHistory = z.infer<typeof networkHistorySchema>;
