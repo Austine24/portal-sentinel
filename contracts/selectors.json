@@ -1,0 +1,43 @@
+{
+  "contract": "SentinelEvidenceRegistry",
+  "functions": {
+    "record": {
+      "signature": "record(bytes32,bytes32,uint8)",
+      "selector": "0x47fb744f"
+    },
+    "get": {
+      "signature": "get(bytes32)",
+      "selector": "0x8eaa6ac0"
+    },
+    "verify": {
+      "signature": "verify(bytes32,bytes32)",
+      "selector": "0x4e8fee00"
+    },
+    "owner": {
+      "signature": "owner()",
+      "selector": "0x8da5cb5b"
+    },
+    "pendingOwner": {
+      "signature": "pendingOwner()",
+      "selector": "0xe30c3978"
+    },
+    "totalRecords": {
+      "signature": "totalRecords()",
+      "selector": "0x125f8974"
+    },
+    "transferOwnership": {
+      "signature": "transferOwnership(address)",
+      "selector": "0xf2fde38b"
+    },
+    "acceptOwnership": {
+      "signature": "acceptOwnership()",
+      "selector": "0x79ba5097"
+    }
+  },
+  "events": {
+    "EvidenceRecorded": {
+      "signature": "EvidenceRecorded(bytes32,bytes32,uint8,address,uint64)",
+      "topic0": "0xb8629543d5bf0820b21378b385beb3ec97d553c727394b49351457f490e076a5"
+    }
+  }
+}

@@ -98,6 +98,20 @@ def ss58_decode(address: str) -> bytes:
     return key
 
 
+def ss58_encode(pubkey: bytes, prefix: int = 42) -> str:
+    """The reverse of ss58_decode: a 32-byte public key to a readable address."""
+    if len(pubkey) != 32 or not 0 <= prefix < 64:
+        raise ValueError("expected a 32-byte key and a one-byte prefix")
+    body = bytes([prefix]) + pubkey
+    data = body + hashlib.blake2b(b"SS58PRE" + body, digest_size=64).digest()[:2]
+    number = int.from_bytes(data, "big")
+    out = ""
+    while number:
+        number, remainder = divmod(number, 58)
+        out = _B58[remainder] + out
+    return "1" * (len(data) - len(data.lstrip(b"\x00"))) + out
+
+
 def account_storage_key(pubkey: bytes) -> str:
     """System.Account(pubkey) as a hex storage key."""
     return "0x" + (

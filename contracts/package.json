@@ -4,7 +4,9 @@
   "type": "module",
   "scripts": {
     "compile": "node scripts/compile.mjs",
-    "test": "node scripts/compile.mjs && node --test \"test/*.test.mjs\""
+    "test": "node scripts/compile.mjs && node --test \"test/*.test.mjs\"",
+    "selectors": "node scripts/compile.mjs && node scripts/selectors.mjs",
+    "fixtures": "node scripts/compile.mjs && node scripts/make_fixtures.mjs"
   },
   "devDependencies": {
     "ethers": "^6.13.0",
