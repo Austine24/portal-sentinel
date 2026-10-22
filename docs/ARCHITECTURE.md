@@ -3,7 +3,7 @@
 Portal Sentinel is a security intelligence and observability layer for the Portaldot ecosystem. It turns raw activity into
 **explained risk**, tracks each alert as an **incident**, and can anchor a **tamper-evident fingerprint** of an incident on-chain.
 
-Status as of 2026-10-18. Transaction data is **DEMO / SIMULATED** until a live transaction source is connected (the testnet currently carries almost no transactions). **Network-health data is LIVE** and read from the Portaldot testnet.
+Status as of 2026-10-21. Transaction data is **DEMO / SIMULATED** until a live transaction source is connected (the testnet currently carries almost no transactions). **Network-health data is LIVE** and read from the Portaldot testnet.
 
 ![System architecture](architecture.svg)
 
@@ -25,10 +25,11 @@ Status as of 2026-10-18. Transaction data is **DEMO / SIMULATED** until a live t
 | Risk engine | Noisy-OR combination of weighted findings, Low to Critical bands, explained factors. | Built |
 | Incident service | Status workflow with legal transitions, audit timeline, duplicate protection. | Built |
 | Evidence service | Frozen canonical JSON, SHA-256 hash, on-chain incident id. | Built |
+| On-chain anchor verification | Given a transaction hash from the browser, the backend reads the receipt and the contract itself: the registry must have emitted the event for exactly this incident id, hash and risk score, and `verify()` must agree. Tested against real EVM output and a real in-memory deployment. | Built, not yet run on the Portaldot testnet |
 | Independent verifier | `scripts/verify_evidence.py`, standard library only, shares no code with the backend. | Built |
 | MySQL | Incidents and timeline, versioned with Alembic migrations. | Built |
 | SentinelEvidenceRegistry | Solidity contract, owner-only, one record per incident, two-step ownership. | Written, 9 tests pass, **not deployed** |
-| Wallet signing | Investigator approves the on-chain record in a browser wallet. | Planned |
+| Wallet signing | The browser builds the `record()` call and asks the investigator's wallet (MetaMask) to approve it; Sentinel never sees a key. Calldata is byte-identical to a real EVM library's. | Built, not yet run against a real wallet |
 
 ## Key design decisions
 

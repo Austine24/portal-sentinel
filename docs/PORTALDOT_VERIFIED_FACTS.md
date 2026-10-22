@@ -356,3 +356,21 @@ Calls seen in the console's extrinsic list: `batchMapAccounts`, `call`, `dispatc
 - VERIFIED-OBSERVED: these calls exist on the testnet.
 - INFERRED, NOT YET TESTED: `ethCall` and `ethInstantiateWithCode` take an encoded Ethereum transaction, which is what an Ethereum-JSON-RPC proxy submits. This suggests contracts can be deployed through the EVM RPC with ordinary Ethereum tools.
 - STILL UNKNOWN (section K, question 3): whether the `code` accepted is plain EVM bytecode or another target. A real test deployment will answer it once funds arrive.
+
+
+---
+
+## P. Funding arrived (probe, 2026-10-19); open hypotheses before deployment
+
+- **TESTED (probe):** the team member's registered address held **500.0000 tPOT** at block 100394 (finality lag 2, BABE author index 0). The first batch of tPOT reached registered participants.
+- Date check on 2026-10-21 04:08 UTC: the chain was about 25 hours past block 85279, consistent with 6-second blocks.
+
+Hypotheses to be tested by `docs/DEPLOYMENT.md` (all UNVERIFIED until the named checkpoint passes):
+
+| Hypothesis | Source | Tested by |
+|---|---|---|
+| An `0x` address is funded by sending tPOT to the account made of its 20 bytes followed by twelve `0xEE` bytes | General pallet-revive documentation, not Portaldot | Checkpoint 2 (`evm_funding_address.py --check`) |
+| The testnet accepts plain EVM bytecode compiled by `solc` (EVM version paris) | The runtime exposes `ethInstantiateWithCode`; compile target unknown | Checkpoint 3 (Remix deployment) |
+| MetaMask can use `https://test-evm-rpc-v3.portaldot.dev` with chain id 420420777 | Organizer announcement | Checkpoint 1 |
+| The native currency shows with 18 decimals in MetaMask although the chain uses 14 | Assumption for the MetaMask network entry | Observed balances at Checkpoint 2 |
+| Ethereum-style transaction hashes cannot be searched in the node console | The console is a Substrate explorer | Checkpoint 4; proof is by `check_registry.py` instead |

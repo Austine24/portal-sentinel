@@ -16,9 +16,10 @@ Monitor. Detect. Investigate. Verify.
 - Evidence packages: frozen, canonical JSON per incident with a SHA-256 hash, plus a standalone verifier (`scripts/verify_evidence.py`, standard library only)
 - React dashboard, incident list and detail pages talking to the API
 - **Network health monitoring on live Portaldot testnet data** (block authors, finality lag, missed slots, stalled production) with a Network page; see `docs/NETWORK_HEALTH.md`
+- Evidence registry contract with tests, and server-side verification of on-chain records (`docs/DEPLOYMENT.md` is the step-by-step deployment runbook)
 - Read-only chain connectivity check script
 
-Not built yet: live transaction ingestion, wallet, deployment of the evidence contract, authentication.
+Not done yet: the first real testnet deployment of the contract, live transaction ingestion, authentication.
 
 ## Run the backend
 ```powershell
@@ -60,6 +61,8 @@ Full description: `docs/ARCHITECTURE.md`. The evidence flow diagram is `docs/evi
 
 ## Documentation
 - `docs/ARCHITECTURE.md` components, design decisions, security posture
+- `docs/DEPLOYMENT.md` deployment runbook for the evidence registry
+- `docs/CHECKIN_DRAFT.md` draft text for the hackathon check-in
 - `docs/NETWORK_HEALTH.md` live network monitoring: signals, rules, limits
 - `docs/AI_MODEL.md` how the anomaly model works and its limits
 - `docs/DEMO_SCRIPT.md` the 3-minute demo script
@@ -86,5 +89,7 @@ MIT. See `LICENSE`. The contract file declares the same license in its SPDX head
 python scripts\check_chain.py https://test-evm-rpc-v3.portaldot.dev 420420777
 python scripts\inspect_chain.py
 python scripts\probe_substrate.py --balance <your 5... address>
+python scripts\evm_funding_address.py 0xYourDeployerAddress --check
+python scripts\check_registry.py 0xDeployedContract
 ```
 All send only read requests, with a descriptive User-Agent (the public RPC rejects Python's default one).

@@ -38,7 +38,7 @@ Be upfront in the submission text that the contract is written and tested but no
 | 2:25 | Press **Record evidence on-chain**; approve in the wallet | "I approve the record in my own wallet. Sentinel never sees my keys." |
 | 2:40 | The transaction in the node console (testnet selected); the incident showing the hash | "Here it is on the Portaldot testnet. The incident links to the transaction, and `verify` on the contract confirms the hash." |
 
-(The on-chain button is not built yet. Do not record Version B until it works end to end.)
+(The button and the server-side verification are built and tested, but they have not yet run against the real testnet. Record Version B only after `docs/DEPLOYMENT.md` Checkpoint 4 passes with a real transaction.)
 
 ## Never say or show
 
