@@ -45,6 +45,8 @@ export const incidentSchema = z.object({
     hash: z.string().nullable(),
     anchored: z.boolean(),
     tx_hash: z.string().nullable(),
+    block: z.number().nullable(),
+    contract: z.string().nullable(),
   }),
   allowed_next: z.array(statusSchema),
 });
@@ -125,3 +127,14 @@ export const networkHistorySchema = z.array(
 
 export type NetworkHealth = z.infer<typeof networkHealthSchema>;
 export type NetworkHistory = z.infer<typeof networkHistorySchema>;
+
+export const chainConfigSchema = z.object({
+  chain_id: z.number(),
+  rpc_url: z.string(),
+  explorer_url: z.string(),
+  registry_address: z.string().nullable(),
+  native_symbol: z.string(),
+  record_selector: z.string(),
+});
+
+export type ChainConfig = z.infer<typeof chainConfigSchema>;

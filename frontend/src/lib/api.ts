@@ -1,5 +1,6 @@
 import type { z } from "zod";
 import {
+  chainConfigSchema,
   evidencePackageSchema,
   incidentListSchema,
   incidentSchema,
@@ -7,6 +8,7 @@ import {
   networkHealthSchema,
   networkHistorySchema,
   syncResultSchema,
+  type ChainConfig,
   type EvidencePackage,
   type Incident,
   type ModelStatus,
@@ -85,4 +87,17 @@ export function refreshNetwork(): Promise<NetworkHealth> {
 
 export function getNetworkHistory(limit = 60): Promise<NetworkHistory> {
   return request(`/api/network/history?limit=${limit}`, networkHistorySchema);
+}
+
+export function getChainConfig(): Promise<ChainConfig> {
+  return request("/api/chain/config", chainConfigSchema);
+}
+
+/** Asks the backend to check the chain itself and link the transaction to the incident. */
+export function anchorEvidence(id: number, txHash: string): Promise<Incident> {
+  return request(`/api/incidents/${id}/evidence/anchor`, incidentSchema, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ tx_hash: txHash }),
+  });
 }

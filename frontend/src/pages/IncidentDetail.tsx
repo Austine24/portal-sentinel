@@ -8,7 +8,9 @@ import { Page } from "../components/Page";
 import { RiskGauge } from "../components/RiskGauge";
 import { SeverityBadge } from "../components/SeverityBadge";
 import { useAsync } from "../hooks/useAsync";
-import { changeStatus, getEvidence, getIncident, prepareEvidence } from "../lib/api";
+import { anchorEvidence, changeStatus, getChainConfig, getEvidence, getIncident, prepareEvidence } from "../lib/api";
+import { encodeRecord } from "../lib/registry";
+import { sendRecordTransaction } from "../lib/wallet";
 import { STATUS_LABEL } from "../lib/risk";
 import type { EvidencePackage, Incident, IncidentStatus } from "../types";
 
@@ -17,6 +19,8 @@ export default function IncidentDetail() {
   const incidentId = Number(id);
   const load = useCallback(() => getIncident(incidentId), [incidentId]);
   const { data, error, loading, reload } = useAsync(load);
+  const loadChain = useCallback(() => getChainConfig(), []);
+  const chain = useAsync(loadChain);
 
   // After a status change the API returns the fresh incident; show it straight away.
   const [updated, setUpdated] = useState<Incident | null>(null);
@@ -63,6 +67,42 @@ export default function IncidentDetail() {
     link.download = `${incident?.public_id ?? "incident"}-evidence.json`;
     link.click();
     URL.revokeObjectURL(url);
+  }
+
+  const [anchorMessage, setAnchorMessage] = useState<string | null>(null);
+  const [anchorBusy, setAnchorBusy] = useState(false);
+
+  async function recordOnChain() {
+    if (!incident || !chain.data) return;
+    setAnchorBusy(true);
+    setEvidenceError(null);
+    setAnchorMessage("Opening your wallet. Check the pop-up and approve the transaction...");
+    try {
+      const evidence = pkg ?? (await getEvidence(incidentId));
+      setPkg(evidence);
+      const data = encodeRecord(chain.data.record_selector, evidence.onchain_incident_id, evidence.hash, incident.risk_score);
+      const txHash = await sendRecordTransaction(chain.data, data);
+
+      // The wallet only tells us a hash. The backend confirms it against the chain before anything is marked anchored.
+      for (let attempt = 1; attempt <= 15; attempt++) {
+        setAnchorMessage(`Transaction sent (${txHash.slice(0, 10)}...). Waiting for the chain to confirm it (${attempt}/15)...`);
+        try {
+          setUpdated(await anchorEvidence(incidentId, txHash));
+          setAnchorMessage(null);
+          return;
+        } catch (err) {
+          const message = err instanceof Error ? err.message : "";
+          if (!message.startsWith("Not confirmed yet")) throw err;
+          await new Promise((resolve) => setTimeout(resolve, 6000));
+        }
+      }
+      setAnchorMessage(`Still not confirmed. Your transaction is ${txHash}. Press the button again later, or check it with scripts/check_registry.py.`);
+    } catch (err) {
+      setAnchorMessage(null);
+      setEvidenceError(err instanceof Error ? err.message : "Could not record the evidence.");
+    } finally {
+      setAnchorBusy(false);
+    }
   }
 
   async function move(status: IncidentStatus) {
@@ -214,9 +254,10 @@ export default function IncidentDetail() {
                 <dd className="mt-1 break-all font-mono text-slate-300">{pkg.onchain_incident_id}</dd>
               </div>
             )}
-            <div className="flex justify-between"><dt>On-chain status</dt><dd className="text-slate-300">{incident.evidence.anchored ? "Anchored" : "Not anchored"}</dd></div>
-            <div className="flex justify-between"><dt>Contract</dt><dd>not deployed yet</dd></div>
-            <div className="flex justify-between"><dt>Transaction</dt><dd>{incident.evidence.tx_hash ?? "none"}</dd></div>
+            <div className="flex justify-between"><dt>On-chain status</dt><dd className={incident.evidence.anchored ? "text-emerald-300" : "text-slate-300"}>{incident.evidence.anchored ? "Anchored" : "Not anchored"}</dd></div>
+            <div><dt>Contract</dt><dd className="mt-1 break-all font-mono text-slate-400">{incident.evidence.contract ?? chain.data?.registry_address ?? "not deployed yet"}</dd></div>
+            <div><dt>Transaction</dt><dd className="mt-1 break-all font-mono text-slate-400">{incident.evidence.tx_hash ?? "none"}</dd></div>
+            {incident.evidence.block !== null && <div className="flex justify-between"><dt>Block</dt><dd className="text-slate-300">{incident.evidence.block}</dd></div>}
           </dl>
 
           {!incident.evidence.prepared ? (
@@ -253,13 +294,21 @@ export default function IncidentDetail() {
           )}
           {evidenceError && <div className="mt-3"><ErrorNotice message={evidenceError} /></div>}
 
-          <button
-            disabled
-            title="Wallet and contract are not connected yet"
-            className="mt-4 w-full cursor-not-allowed rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-slate-500"
-          >
-            Record evidence on-chain (not connected yet)
-          </button>
+          {incident.evidence.anchored ? (
+            <p className="mt-4 rounded-xl border border-emerald-400/30 bg-emerald-400/5 p-3 text-xs text-emerald-200">
+              Verified against the chain: the registry recorded this incident's id, hash and risk score in block {incident.evidence.block}.
+            </p>
+          ) : (
+            <button
+              disabled={anchorBusy || !incident.evidence.prepared || !chain.data?.registry_address}
+              onClick={recordOnChain}
+              title={!incident.evidence.prepared ? "Prepare the evidence package first" : !chain.data?.registry_address ? "The evidence registry has not been deployed yet" : "Opens your wallet to approve the transaction"}
+              className="mt-4 w-full rounded-xl bg-cyan-400/90 px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-cyan-300 disabled:cursor-not-allowed disabled:bg-white/5 disabled:text-slate-500"
+            >
+              {anchorBusy ? "Working..." : !chain.data?.registry_address ? "Record evidence on-chain (registry not deployed yet)" : "Record evidence on-chain"}
+            </button>
+          )}
+          {anchorMessage && <p className="mt-2 text-xs text-slate-400">{anchorMessage}</p>}
         </GlassCard>
       </div>
     </Page>
