@@ -26,6 +26,8 @@ class Evidence(BaseModel):
     hash: str | None = None
     anchored: bool
     tx_hash: str | None = None
+    block: int | None = None
+    contract: str | None = None
 
 
 class EvidencePackage(BaseModel):
@@ -84,3 +86,16 @@ class ModelStatusOut(BaseModel):
     rules: list[RuleInfo]
     data_origin: DataOrigin
     note: str
+
+
+class AnchorRequest(BaseModel):
+    tx_hash: str = Field(pattern=r"^0x[0-9a-fA-F]{64}$", description="Ethereum transaction hash of the record() call")
+
+
+class ChainConfig(BaseModel):
+    chain_id: int
+    rpc_url: str
+    explorer_url: str
+    registry_address: str | None
+    native_symbol: str
+    record_selector: str

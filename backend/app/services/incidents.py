@@ -12,7 +12,8 @@ from app.domain.incidents import (
     SyncResult,
 )
 from app.domain.models import RiskAssessment, RiskFactor, RuleFinding
-from app.evidence.canonical import evidence_hash
+from app.evidence.anchor import AnchorError, ChainReader, verify_anchor
+from app.evidence.canonical import evidence_hash, onchain_incident_id
 from app.evidence.package import build_package, new_nonce
 from app.repositories import incidents as repo
 
@@ -45,6 +46,8 @@ def to_out(row: IncidentRow) -> IncidentOut:
             hash=row.evidence_hash,
             anchored=row.evidence_tx_hash is not None,
             tx_hash=row.evidence_tx_hash,
+            block=row.evidence_block,
+            contract=row.evidence_contract,
         ),
         allowed_next=sorted(ALLOWED_TRANSITIONS[row.status]),
     )
@@ -117,5 +120,35 @@ def prepare_evidence(session: Session, row: IncidentRow, now: datetime) -> Incid
     row.evidence_prepared_at = now
     repo.add_event(row, f"Evidence package prepared (hash {row.evidence_hash[:10]}...{row.evidence_hash[-6:]})", now)
     row.updated_at = now
+    session.commit()
+    return row
+
+
+class AnchorConflict(Exception):
+    pass
+
+
+def anchor_evidence(
+    session: Session, row: IncidentRow, tx_hash: str, chain: ChainReader, registry_address: str, now: datetime
+) -> IncidentRow:
+    """Records on the incident that its evidence is on-chain, but only after verifying it on-chain."""
+    if row.evidence_package is None:
+        raise AnchorConflict("Prepare the evidence package first.")
+    if row.evidence_tx_hash is not None:
+        if row.evidence_tx_hash == tx_hash.lower():
+            return row                                     # same transaction again: nothing to do
+        raise AnchorConflict("This incident's evidence is already anchored by a different transaction.")
+
+    package = row.evidence_package
+    proof = verify_anchor(                                 # raises AnchorError when it does not check out
+        chain, registry_address, tx_hash,
+        onchain_incident_id(package), row.evidence_hash, int(package["assessment"]["risk_score"]),
+    )
+    row.evidence_tx_hash = proof.tx_hash
+    row.evidence_block = proof.block_number
+    row.evidence_contract = proof.contract
+    row.evidence_anchored_at = now
+    row.updated_at = now
+    repo.add_event(row, f"Evidence anchored on-chain in block {proof.block_number} (tx {proof.tx_hash[:10]}...{proof.tx_hash[-6:]})", now)
     session.commit()
     return row

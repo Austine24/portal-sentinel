@@ -6,6 +6,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.exc import OperationalError, ProgrammingError
 
 from app.api.routes.assessments import router as assessments_router
+from app.api.routes.chain import router as chain_router
 from app.api.routes.evidence import router as evidence_router
 from app.api.routes.incidents import router as incidents_router
 from app.api.routes.model import router as model_router
@@ -31,6 +32,7 @@ app.include_router(incidents_router)
 app.include_router(evidence_router)
 app.include_router(model_router)
 app.include_router(network_router)
+app.include_router(chain_router)
 
 
 @app.get("/health")

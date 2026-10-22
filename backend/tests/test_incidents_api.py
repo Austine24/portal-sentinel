@@ -7,7 +7,7 @@ def test_sync_then_list_and_get(client):
     assert items and all(i["data_origin"] == "simulated" for i in items)
     first = items[0]
     assert first["public_id"].startswith("INC-")
-    assert first["evidence"] == {"prepared": False, "hash": None, "anchored": False, "tx_hash": None}
+    assert first["evidence"] == {"prepared": False, "hash": None, "anchored": False, "tx_hash": None, "block": None, "contract": None}
 
     detail = client.get(f"/api/incidents/{first['id']}").json()
     assert detail["id"] == first["id"]
