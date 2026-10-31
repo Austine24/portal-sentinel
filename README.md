@@ -93,3 +93,9 @@ python scripts\evm_funding_address.py 0xYourDeployerAddress --check
 python scripts\check_registry.py 0xDeployedContract
 ```
 All send only read requests, with a descriptive User-Agent (the public RPC rejects Python's default one).
+
+cd backend
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pytest -q
+uvicorn app.main:app --reload

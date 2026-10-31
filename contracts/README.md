@@ -38,11 +38,14 @@ npm install
 npm test
 ```
 
-Expected: `compiled SentinelEvidenceRegistry (...)`, then `# tests 9`, `# pass 9`, `# fail 0`.
+Expected: `compiled SentinelEvidenceRegistry (...)`, then 15 tests passing (9 for the contract, 6 for the deploy script's guards).
 The tests use the Solidity compiler packaged in npm (no downloads) and an in-memory EVM (ganache).
 Covered: valid record and event, non-owner, duplicate, invalid input, boundary scores, unknown incident,
 verify (match, tampered, unknown), and the full two-step ownership flow.
 `npm install` reports advisories in ganache's own dependencies; ganache is a dev-only test tool and is never deployed.
+
+## Deploy to a real network (guarded script)
+`node scripts/deploy.mjs` is a dry run; `--confirm` deploys. It refuses a wrong chain id or an empty account, reads the key only from a hidden terminal variable, and never prints or saves it. See `docs/DEPLOYMENT.md`, Option B. Its guards are tested against an in-memory EVM (`npm test`).
 
 ## Try it by hand in Remix (optional, no install)
 

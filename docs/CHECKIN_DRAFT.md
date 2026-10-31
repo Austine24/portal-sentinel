@@ -13,7 +13,7 @@ One sentence: Portal Sentinel watches the Portaldot network and account behaviou
 - **Evidence packages**: frozen canonical JSON, SHA-256 hash, an independent verifier script, and an on-chain incident id.
 - **Evidence registry contract** (Solidity): owner-only, one record per incident, two-step ownership. 9 tests pass, and deliberately broken versions are caught.
 - **Server-side on-chain verification**: Sentinel confirms a transaction against the chain (receipt, event, contract state) before marking evidence anchored. Tested against a real EVM.
-- 179 automated tests; every simulated element is labelled.
+- 179 backend tests and 15 contract tests; every simulated element is labelled.
 
 ## Testnet deployment information
 [FILL IN ONE of the two versions]
@@ -26,7 +26,7 @@ One sentence: Portal Sentinel watches the Portaldot network and account behaviou
 - Explorer: the node console (https://node-console.portaldot.dev, testnet selected) shows the chain; Ethereum-style transaction hashes are verified with `scripts/check_registry.py` in the repository.
 
 **If not yet deployed (state this plainly):**
-The contract is written and tested but not yet deployed. The testnet endpoints were announced on 2026-10-16 and test tokens reached our wallet on [FILL IN DATE]. The first public RPC value we found was retired, and the organizers' technical team confirmed on 2026-10-14 that endpoints, funding and an explorer were not yet available (statement saved). [FILL IN what is blocking now and the exact error, if any.]
+The contract is written and tested but not yet deployed. The testnet endpoints were announced on 2026-10-16 and test tokens reached our wallet on or before 2026-10-19; we funded a dedicated deployer account on 2026-10-22 and confirmed the funding path works. The first public RPC value we found was retired, and the organizers' technical team confirmed on 2026-10-14 that endpoints, funding and an explorer were not yet available (statement saved). [FILL IN what is blocking now and the exact error, if any.]
 
 ## Outstanding items
 - Live transaction ingestion (the testnet is nearly empty, so we will generate labelled test activity).
@@ -45,3 +45,8 @@ The contract is written and tested but not yet deployed. The testnet endpoints w
 
 ## Honest limits to mention if asked
 Transaction data is simulated; thresholds are untuned on real data; no API authentication yet; one owner key controls recording.
+
+
+## Verified facts you may quote (all observed by us, 2026-10-22)
+- Chain id 420420777; RPC https://test-evm-rpc-v3.portaldot.dev; node https://test-node-v3.portaldot.dev (BABE block production, 6 s blocks, two block authors observed).
+- An Ethereum-style account is funded by sending tPOT to its fallback account (address bytes plus twelve 0xEE bytes); tested end to end.

@@ -1,0 +1,12 @@
+{
+  "contract": "SentinelEvidenceRegistry",
+  "network": "Portaldot V3 Testnet",
+  "chainId": 420420777,
+  "rpc": "https://test-evm-rpc-v3.portaldot.dev",
+  "contractAddress": "0x0E7529E43Fe0E1f1060795eCDab5a3B92A7147a1",
+  "deploymentTxHash": "0x19583a59d3f0d59ed563bbef72f71bc5ff5d720e657503c4708718644f2856fc",
+  "blockNumber": 234876,
+  "deployer": "0x7daB6e3E7049c8371E962BEfC2bA4D8b4e56cf0A",
+  "deployedAt": "2026-10-29T06:52:01.353Z",
+  "compiler": "solc 0.8.26, evmVersion paris, optimizer 200 runs"
+}

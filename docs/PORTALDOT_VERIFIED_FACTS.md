@@ -374,3 +374,30 @@ Hypotheses to be tested by `docs/DEPLOYMENT.md` (all UNVERIFIED until the named 
 | MetaMask can use `https://test-evm-rpc-v3.portaldot.dev` with chain id 420420777 | Organizer announcement | Checkpoint 1 |
 | The native currency shows with 18 decimals in MetaMask although the chain uses 14 | Assumption for the MetaMask network entry | Observed balances at Checkpoint 2 |
 | Ethereum-style transaction hashes cannot be searched in the node console | The console is a Substrate explorer | Checkpoint 4; proof is by `check_registry.py` instead |
+
+
+---
+
+## Q. Phases 1 and 2 of the deployment runbook PASSED (2026-10-22)
+
+Source: output of `scripts/evm_funding_address.py --check` and screenshots from the team member's browser. Status: **TESTED**.
+
+| Item | Result |
+|---|---|
+| MetaMask network entry (RPC https://test-evm-rpc-v3.portaldot.dev, chain id 420420777, symbol tPOT) | Accepted; MetaMask shows "Portaldot V3 Testnet" |
+| Deployer account (public) | `Sentinel Deployer`, 0x7daB6e3E7049c8371E962BEfC2bA4D8b4e56cf0A |
+| Its fallback account (public) | 5EuUmWmSSVDgWCntK6qrBERAbzT8C29W7kjtazC2HyJLA4uC (the 20 address bytes followed by twelve 0xEE bytes) |
+| Test transfer | 5 tPOT sent from the registered native account through the node console |
+| Substrate view of the fallback account | 5.0000 tPOT (500000000000000 smallest units) |
+| Ethereum RPC view of the 0x address | 4900000000000000000 raw, which is 4.9 tPOT at 18 decimals; MetaMask also showed 4.9 tPOT |
+| **Fallback-account hypothesis** | **CONFIRMED for Portaldot: funds sent to the 0xEE-padded account appear at the 0x address** |
+| Scale | The Ethereum view uses 18 decimals (1 tPOT = 10^18), while the native token has 14. MetaMask's 18-decimal setting is right. |
+| 0.1 tPOT difference between the two views | INFERRED, not confirmed: consistent with the existential deposit being withheld from the spendable (Ethereum-view) balance |
+| Transfer fee observed | about 0.0151 tPOT (sender 500 to 494.9849 after sending 5) |
+| Sender account | The console showed a warning triangle next to the extension account; the transfer worked anyway. Meaning not investigated. |
+
+### Remix
+`app.remix.live` timed out on the PC and on a phone. That is NOT the Ethereum Remix IDE (`remix.ethereum.org`), so the wrong address was probably used. `remix.ethereum.org` itself has not been tested. A script-based deployment (`contracts/scripts/deploy.mjs`) is the fallback.
+
+### Still unknown until Phase 3
+Whether the testnet accepts plain `solc` EVM bytecode (EVM version paris), and whether a deployment through the public RPC succeeds at all.

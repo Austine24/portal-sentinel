@@ -1,6 +1,8 @@
 # Deployment runbook: evidence registry on the Portaldot V3 testnet
 
-Status as of 2026-10-21. Check-in deadline: 2026-10-24 12:00 UTC (13:00 Lagos).
+Status as of 2026-10-23. Check-in deadline: 2026-10-24 12:00 UTC (13:00 Lagos).
+
+**Progress:** Phase 1 PASSED and Phase 2 PASSED (2026-10-22, by the team member). Phase 3 is next.
 
 Everything below is **unverified until its checkpoint passes**. Each checkpoint says what to do if it fails. Stop at the first failure and send the exact output; do not improvise.
 
@@ -23,7 +25,7 @@ Everything below is **unverified until its checkpoint passes**. Each checkpoint 
 | Currency symbol | tPOT |
 | Block explorer URL | https://node-console.portaldot.dev/?rpc=wss%3A%2F%2Ftest-node-v3.portaldot.dev |
 
-**Checkpoint 1:** the network saves with no error and the balance shows 0 tPOT. If MetaMask says it cannot fetch the chain id, stop and send me the message.
+**Checkpoint 1 (PASSED):** the network saves with no error and the balance shows 0 tPOT. If MetaMask says it cannot fetch the chain id, stop and send me the message.
 
 ## Phase 2: fund the deployer (15 minutes)
 An `0x` account is funded by sending tPOT to its "fallback" account. That is general behaviour of this kind of chain and is **not yet confirmed for Portaldot**. The check below tests it with a small amount.
@@ -34,24 +36,53 @@ An `0x` account is funded by sending tPOT to its "fallback" account. That is gen
 3. Accounts, Accounts, find your account, press **send**. Paste the `5...` address as the recipient, amount **5**, unit **tPOT**, Make Transfer, approve in the Portaldot extension.
 4. Wait 30 seconds, then run: `python scripts\evm_funding_address.py 0xYOUR_DEPLOYER_ADDRESS --check`
 
-**Checkpoint 2:** it prints `RESULT: both views see funds`, and MetaMask shows a non-zero balance.
+**Checkpoint 2 (PASSED):** it prints `RESULT: both views see funds`, and MetaMask shows a non-zero balance.
 - Result says the Substrate side sees funds but the Ethereum side does not, or still zero after 2 minutes: **STOP. Send nothing more.** Paste the output. The 5 tPOT is a small testnet loss, and it tells us the fallback-account assumption is wrong.
 
-## Phase 3: deploy with Remix (15 minutes)
-1. Open https://remix.ethereum.org. Create `SentinelEvidenceRegistry.sol` and paste the contents of `contracts/contracts/SentinelEvidenceRegistry.sol`.
+## Phase 3: deploy the contract (15 minutes). Pick ONE option.
+
+### Option A: Remix in the browser (keys stay inside MetaMask)
+**Type the address exactly: `https://remix.ethereum.org`.** (`app.remix.live`, which timed out for you on two devices, is not the Ethereum Remix IDE.)
+If it will not load: try mobile data on the PC (phone hotspot), or set the PC's DNS to 1.1.1.1. If it still fails after about 5 minutes, **go to Option B**. Do not keep fighting the website.
+
+1. Create `SentinelEvidenceRegistry.sol` and paste the contents of `contracts/contracts/SentinelEvidenceRegistry.sol`.
 2. Solidity compiler tab: version **0.8.26** (any 0.8.2x works), Advanced Configurations: **EVM Version = paris**, **Enable optimization = 200**. Compile.
 3. Deploy and run tab: Environment **Injected Provider - MetaMask**. Check that MetaMask is on Portaldot V3 Testnet and the account is `Sentinel Deployer`. Deploy, then approve in MetaMask.
 
-**Checkpoint 3:** Remix logs success and lists the contract under "Deployed Contracts". Copy the **contract address** and the **deployment transaction hash** (MetaMask, Activity, the transaction, copy hash).
-- In Remix, expand the contract: `owner` should equal your deployer address and `totalRecords` should be 0.
-- Then run: `python scripts\check_registry.py 0xYOUR_CONTRACT` and expect "code at address: yes", the owner, and "records stored: 0".
+### Option B: deploy script from your own computer (no website needed)
+This uses the tools you already installed. It sends the transaction with the **deployer's private key**, so the rules below matter more than ever.
+- Use ONLY the `Sentinel Deployer` key. It holds testnet tokens only. Never use or export your main wallet.
+- The key is typed into one terminal window, hidden, and is never saved to a file or printed. Never paste it into chat, Discord, a file in the repo, or a screenshot.
+- Export it in MetaMask: pick `Sentinel Deployer`, the three-dot menu next to the account name, **Account details**, **Show private key**, enter your MetaMask password, copy it.
+
+```powershell
+cd C:\dev\portal-sentinel\contracts
+npm install
+npm run compile
+$secure = Read-Host "Paste the DEPLOYER private key (it will be hidden)" -AsSecureString
+$env:DEPLOYER_PRIVATE_KEY = [System.Net.NetworkCredential]::new("", $secure).Password
+node scripts\deploy.mjs
+```
+**Expected (dry run, nothing sent):** `chain id : 420420777 (matches)`, your deployer address, a spendable balance of about 4.9, and `DRY RUN. Everything checks out and nothing was sent.`
+If the address printed is not `0x7daB6e3E7049c8371E962BEfC2bA4D8b4e56cf0A`, STOP: you pasted the wrong key.
+
+Then deploy for real, and clear the key from the window:
+```powershell
+node scripts\deploy.mjs --confirm
+Remove-Item Env:DEPLOYER_PRIVATE_KEY
+```
+**Expected:** the deployment transaction hash, `contract : 0x...`, a block number, `owner` equal to your deployer, `records stored : 0`, and a saved file `contracts\deployments\portaldot-testnet.json` (public details only).
+If the error mentions gas fees, retry with `node scripts\deploy.mjs --confirm --legacy`.
+
+**Checkpoint 3 (either option):** you have a contract address and a deployment transaction hash.
+- Run: `python scripts\check_registry.py 0xYOUR_CONTRACT` and expect "code at address: yes", the owner, and "records stored: 0".
 
 | If you see | Likely meaning | Do this |
 |---|---|---|
-| insufficient funds / gas | Not enough tPOT in the deployer | Send another 5 tPOT, repeat Phase 2 step 3 |
+| insufficient funds / gas | Not enough tPOT in the deployer | Send another 5 tPOT (Phase 2 step 3) |
 | invalid opcode, code rejected, revert without a reason | The chain may need a different compile target (for example PolkaVM) | **STOP.** Send me the exact error text. We switch compile path |
-| MetaMask cannot fetch / network error | The RPC refused the browser | Send me the exact message |
-| Remix cannot estimate gas | Estimation unsupported | Send me the message; we try a manual gas limit |
+| Chain id mismatch | Wrong network or node | Do not override it. Send me the message |
+| MetaMask or script cannot reach the RPC | The RPC refused the client | Send me the exact message |
 
 ## Phase 4: connect Sentinel and record real evidence (10 minutes)
 1. In `backend\.env` add one line: `REGISTRY_ADDRESS=0xYOUR_CONTRACT`
