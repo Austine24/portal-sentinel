@@ -401,3 +401,22 @@ Source: output of `scripts/evm_funding_address.py --check` and screenshots from 
 
 ### Still unknown until Phase 3
 Whether the testnet accepts plain `solc` EVM bytecode (EVM version paris), and whether a deployment through the public RPC succeeds at all.
+
+## R. First real testnet deployment and on-chain evidence (2026-10-29 to 2026-10-31)
+
+All entries below were observed on 2026-10-29 and 2026-10-31. Public information only.
+
+| Fact | Status | Evidence |
+|---|---|---|
+| Plain `solc` 0.8.26 bytecode (EVM version paris, optimizer 200 runs) deploys on the testnet through the public EVM RPC | TESTED | Deployment tx `0x19583a59d3f0d59ed563bbef72f71bc5ff5d720e657503c4708718644f2856fc`, block 234876, `scripts/check_registry.py` |
+| Contract address | TESTED | `0x0E7529E43Fe0E1f1060795eCDab5a3B92A7147a1`; runtime code 1667 bytes; owner = deployer `0x7daB6e3E7049c8371E962BEfC2bA4D8b4e56cf0A` |
+| `eth_call` of the creation bytecode returns the runtime code (simulated deploy works) | TESTED | `contracts/scripts/diagnose_deploy.mjs` output |
+| Gas price | TESTED | `eth_gasPrice` returned 0x6c98 (27800 wei) |
+| Gas estimates are very large: about 5.4e15 for this contract and about 3.3e14 for a tiny control contract | TESTED | `eth_estimateGas`, same diagnostic |
+| The first deployment attempt with 4.9 tPOT failed with the library message "could not coalesce error"; after sending 200 tPOT to the deployer's fallback account the identical command succeeded | TESTED | Before and after runs of `deploy.mjs --confirm` |
+| The cause of that failure was an upfront balance requirement of roughly gas limit x gas price (about 149 tPOT for this contract) | INFERRED (consistent with the numbers, the node's raw error was not captured) | Arithmetic from the two rows above |
+| First evidence record anchored from the UI with MetaMask | TESTED | Tx `0xd54b3f08f762ffb574992c42b360771d2d558d6123ce418b2e3c45187eef21b8`, block 264555; `check_registry.py --incident ... --hash ...` returned `verify = True`, risk score 98, records stored 1 |
+| The incident behind that record was created from simulated transactions | DEMO / SIMULATED | The testnet had no real transactions during development |
+| `remix.ethereum.org` did not load for the developer | OBSERVED, cause UNKNOWN | Script-based deployment was used instead |
+
+Resolved from section P: the hypothesis "the testnet accepts plain EVM bytecode compiled by solc (paris)" is now TESTED true. The compile-target question in section K is answered for this contract.

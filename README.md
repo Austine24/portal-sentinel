@@ -19,7 +19,9 @@ Monitor. Detect. Investigate. Verify.
 - Evidence registry contract with tests, and server-side verification of on-chain records (`docs/DEPLOYMENT.md` is the step-by-step deployment runbook)
 - Read-only chain connectivity check script
 
-Not done yet: the first real testnet deployment of the contract, live transaction ingestion, authentication.
+Deployed: `SentinelEvidenceRegistry` is live on the Portaldot V3 testnet at `0x0E7529E43Fe0E1f1060795eCDab5a3B92A7147a1` (deployment tx `0x19583a59d3f0d59ed563bbef72f71bc5ff5d720e657503c4708718644f2856fc`, block 234876). One evidence record has been anchored through the UI (block 264555, tx `0xd54b3f08f762ffb574992c42b360771d2d558d6123ce418b2e3c45187eef21b8`) and independently checked with `scripts/check_registry.py`. The incident behind that record was created from SIMULATED transactions (the testnet had no real transactions when it was built); the anchoring itself is real.
+
+Not done yet: live transaction ingestion, authentication.
 
 ## Run the backend
 ```powershell
